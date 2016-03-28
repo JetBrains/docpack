@@ -1,0 +1,43 @@
+{
+  "name": "webpack-docs-plugin",
+  "version": "0.0.1",
+  "description": "Webpack docs plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/*.test.js",
+    "clean": "rm -rf ./build",
+    "example": "webpack --config test/fixtures/plugin/webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kisenka/webpack-docs-plugin.git"
+  },
+  "author": "kisenka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kisenka/webpack-docs-plugin/issues"
+  },
+  "homepage": "https://github.com/kisenka/webpack-docs-plugin#readme",
+  "files": [
+    "lib/",
+    "index.js"
+  ],
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "clone": "^1.0.2",
+    "memory-fs": "^0.3.0",
+    "mocha": "^2.4.5",
+    "object-assign": "^4.0.1",
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "dependencies": {
+    "clone": "^1.0.2",
+    "consolidate": "^0.14.0",
+    "deep-diff": "^0.3.3",
+    "dox": "^0.8.0",
+    "loader-utils": "^0.2.13",
+    "nunjucks": "^2.4.1",
+    "object-assign": "^4.0.1"
+  }
+}
