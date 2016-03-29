@@ -34,7 +34,7 @@ describe('Plugin', function() {
 
   describe('::extract()', function() {
 
-    it('::extract() should exists', function() {
+    it('should exists', function() {
       expect(Plugin.extract).to.be.a('function');
     });
 
