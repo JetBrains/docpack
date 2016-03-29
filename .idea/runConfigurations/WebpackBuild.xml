@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="WebpackBuild" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="$NODE_LOCATION$" path-to-js-file="node_modules/webpack/bin/webpack.js" application-parameters="--config test/fixtures/plugin/webpack.config.js" working-dir="$PROJECT_DIR$">
+    <method>
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Clean" run_configuration_type="js.build_tools.npm" />
+    </method>
+  </configuration>
+</component>
