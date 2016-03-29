@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test/*.test.js",
-    "clean": "rm -rf ./build",
+    "clean": "rimraf ./build",
     "example": "npm run clean && webpack --config test/fixtures/plugin/webpack.config.js"
   },
   "repository": {
@@ -27,6 +27,7 @@
     "clone": "^1.0.2",
     "memory-fs": "^0.3.0",
     "mocha": "^2.4.5",
+    "rimraf": "^2.5.2",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1"
   },
