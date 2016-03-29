@@ -27,7 +27,6 @@
     "clone": "^1.0.2",
     "memory-fs": "^0.3.0",
     "mocha": "^2.4.5",
-    "object-assign": "^4.0.1",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1"
   },
