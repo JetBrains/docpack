@@ -1,7 +1,7 @@
 {
-  "name": "docs-webpack-plugin",
+  "name": "webpack-docs-plugin",
   "version": "0.0.1",
-  "description": "Docs Webpack plugin",
+  "description": "Webpack Docs plugin",
   "main": "lib/plugin.js",
   "scripts": {
     "test": "mocha test/*.test.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kisenka/docs-webpack-plugin.git"
+    "url": "git+https://github.com/kisenka/webpack-docs-plugin.git"
   },
   "author": "kisenka",
   "license": "MIT",
