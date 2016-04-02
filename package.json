@@ -2,7 +2,7 @@
   "name": "webpack-docs-plugin",
   "version": "0.0.1",
   "description": "Webpack docs plugin",
-  "main": "index.js",
+  "main": "lib/plugin.js",
   "scripts": {
     "test": "mocha test/*.test.js",
     "clean": "rimraf ./build",
