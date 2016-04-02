@@ -35,9 +35,12 @@
     "dotty": "0.0.2",
     "dox": "^0.8.0",
     "extend": "^3.0.0",
+    "file-exists": "^1.0.0",
+    "is-plain-object": "^2.0.1",
     "loader-utils": "^0.2.13",
     "nunjucks": "^2.4.1",
     "posthtml-parser": "^0.1.3",
-    "posthtml-render": "^1.0.6"
+    "posthtml-render": "^1.0.6",
+    "sprintf": "^0.1.5"
   }
 }
