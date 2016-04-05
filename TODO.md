@@ -8,3 +8,4 @@
 * Config validation
 * Event system
 * Refactorings: error handling, error constants
+* Move compilation & render steps from loader to plugin
