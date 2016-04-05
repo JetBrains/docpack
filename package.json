@@ -1,6 +1,6 @@
 {
   "name": "webpack-docs-plugin",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha",
   "description": "Webpack Docs plugin",
   "main": "lib/plugin.js",
   "scripts": {
@@ -19,7 +19,11 @@
   },
   "homepage": "https://github.com/kisenka/webpack-docs-plugin#readme",
   "files": [
-    "lib/"
+    "assets/",
+    "lib/",
+    "README.md",
+    "TODO.md",
+    "typedefs.js"
   ],
   "devDependencies": {
     "chai": "3.5.0",
