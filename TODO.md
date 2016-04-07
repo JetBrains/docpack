@@ -10,3 +10,4 @@
 * Error handling from child compilation
 * Error constants
 * Move compilation & render steps from loader to plugin
+* Pitching loader mode or normal?
