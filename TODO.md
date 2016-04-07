@@ -7,5 +7,6 @@
 * Markdown extractor (page & examples)
 * Config validation
 * Event system
-* Refactorings: error handling, error constants
+* Error handling from child compilation
+* Error constants
 * Move compilation & render steps from loader to plugin
