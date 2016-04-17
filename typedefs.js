@@ -5,3 +5,7 @@
 /**
  * @typedef {Object} LoaderContext
  */
+
+/**
+ * @typedef {Object} LoaderConfig
+ */
