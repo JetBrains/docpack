@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/kisenka/webpack-docs-plugin#readme",
   "files": [
-    "assets/",
     "lib/",
     "README.md",
     "TODO.md",
