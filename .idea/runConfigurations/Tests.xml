@@ -7,7 +7,7 @@
     <ui>bdd</ui>
     <extra-mocha-options />
     <test-kind>PATTERN</test-kind>
-    <test-pattern>test/*.test.js</test-pattern>
+    <test-pattern>test/**/*.test.js</test-pattern>
     <method />
   </configuration>
 </component>
