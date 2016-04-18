@@ -21,7 +21,7 @@ function createCompiler(options) {
         {
           // second loader for this file type
           test: /\.source-with-prefix-loader$/,
-          loader: require.resolve('./utils/prefix-loader') + '?qwe'
+          loader: require.resolve('./test-utils/prefix-loader') + '?qwe'
         }
       ]
     }
@@ -36,8 +36,8 @@ function createCompiler(options) {
 describe('configure/loader', function() {
 
   it('should contain LOADER_PATH property', function() {
-    loader.should.have.property('LOADER_PATH');
-  });
+      loader.should.have.property('LOADER_PATH');
+    });
 
   it('should skip js files', function(done) {
     var entryContent = 'console.log(123);';
@@ -77,6 +77,6 @@ describe('configure/loader', function() {
       stats.compilation.assets.test.source().should.not.contain(entryContent);
       done();
     })
-  })
+  });
 
 });

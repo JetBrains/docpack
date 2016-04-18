@@ -3,9 +3,9 @@
  */
 
 /**
- * @typedef {Object} LoaderContext
+ * @typedef {Object} WebpackLoaderContext
  */
 
 /**
- * @typedef {Object} LoaderConfig
+ * @typedef {Object} WebpackLoaderConfig
  */
