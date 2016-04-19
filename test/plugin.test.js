@@ -1,6 +1,6 @@
 var should = require('chai').should();
 var Plugin = require('../lib/plugin');
-var configureLoaderPath = require('../lib/configure/loader').LOADER_PATH;
+var configureLoaderPath = require('../lib/configuration/loader').LOADER_PATH;
 
 describe('Plugin', function () {
 
