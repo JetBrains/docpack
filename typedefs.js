@@ -9,3 +9,8 @@
 /**
  * @typedef {Object} WebpackLoaderConfig
  */
+
+/**
+ * @typedef {Function} DocsPluginExtractor
+ * @returns {Promise}
+ */
