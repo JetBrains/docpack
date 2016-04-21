@@ -28,6 +28,7 @@
     "chai": "3.5.0",
     "mocha": "2.4.5",
     "rimraf": "2.5.2",
+    "webpack-config-merger": "0.0.5",
     "webpack-dev-server": "1.14.1"
   },
   "dependencies": {
