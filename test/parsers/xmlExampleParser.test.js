@@ -1,6 +1,6 @@
 require('chai').should();
 
-var exampleParser = require('../../lib/parsers/xmlExampleParser');
+var exampleParser = require('../../lib/plugins/extractors/parsers/xmlExampleParser');
 var data = require('../../lib/data');
 var Example = data.Example;
 var ExampleFile = data.ExampleFile;
