@@ -1,9 +1,9 @@
-var should = require('chai').should();
+require('chai').should();
 var extend = require('extend');
 
 var loader = require('../../lib/configuration/loader');
 var configureLoaderPath = loader.LOADER_PATH;
-var memoryCompiler = require('../../lib/compiler/memoryCompiler');
+var MemoryCompiler = require('../../lib/compiler/InMemoryCompiler');
 
 function createCompiler(options) {
   var opts = extend(true, {
@@ -27,13 +27,11 @@ function createCompiler(options) {
     }
   }, options || {});
 
-  var compiler = memoryCompiler(opts, true, true);
-
-  return compiler;
+  return new MemoryCompiler(opts, true, true);
 }
 
 
-describe('configure/loader', function() {
+describe('configure loader', function() {
 
   it('should contain LOADER_PATH property', function() {
       loader.should.have.property('LOADER_PATH');
@@ -45,9 +43,8 @@ describe('configure/loader', function() {
     var compiler = createCompiler({entry: {test: './test'}});
     compiler.inputFileSystem.writeFileSync('/test.js', entryContent, 'utf-8');
 
-    compiler.run(function(err, stats) {
-      stats.compilation.errors.should.be.empty;
-      stats.compilation.assets.test.source().should.contain(entryContent);
+    compiler.run().then(function(compilation) {
+      compilation.assets.test.source().should.contain(entryContent);
       done();
     })
   });
@@ -59,9 +56,8 @@ describe('configure/loader', function() {
     var compiler = createCompiler({entry: {test: './test.source-with-prefix-loader'}});
     compiler.inputFileSystem.writeFileSync('/test.source-with-prefix-loader', entryContent, 'utf-8');
 
-    compiler.run(function (err, stats) {
-      stats.compilation.errors.should.be.empty;
-      stats.compilation.assets.test.source().should.contain(entryContentWithPrefix);
+    compiler.run().then(function (compilation) {
+      compilation.assets.test.source().should.contain(entryContentWithPrefix);
       done();
     })
   });
@@ -70,11 +66,10 @@ describe('configure/loader', function() {
     var entryContent = '<svg></svg>';
 
     var compiler = createCompiler({entry: {test: './test.svg'}});
-    compiler.outputFileSystem.writeFileSync('/test.svg', entryContent, 'utf-8');
+    compiler.inputFileSystem.writeFileSync('/test.svg', entryContent, 'utf-8');
 
-    compiler.run(function(err, stats) {
-      stats.compilation.errors.should.be.empty;
-      stats.compilation.assets.test.source().should.not.contain(entryContent);
+    compiler.run().then(function(compilation) {
+      compilation.assets.test.source().should.not.contain(entryContent);
       done();
     })
   });
