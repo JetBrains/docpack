@@ -37,7 +37,7 @@
     "dotty": "0.0.2",
     "dox": "0.8.0",
     "extend": "3.0.0",
-    "loader-utils": "^0.2.12",
+    "loader-utils": "0.2.14",
     "memory-fs": "0.3.0",
     "merge-options": "0.0.64",
     "posthtml-parser": "0.1.3",
