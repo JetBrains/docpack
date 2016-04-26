@@ -37,6 +37,8 @@
     "dotty": "0.0.2",
     "dox": "0.8.0",
     "extend": "3.0.0",
+    "highlight.js": "9.3.0",
+    "js-beautify": "1.6.2",
     "loader-utils": "0.2.14",
     "memory-fs": "0.3.0",
     "merge-options": "0.0.64",
