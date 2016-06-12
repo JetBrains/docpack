@@ -3,7 +3,7 @@ var expect = require('chai').expect;
 
 var Plugin = require('../lib/plugin');
 var HOOKS = require('../lib/hooks');
-var configureLoaderPath = require('../lib/configuration/loader').LOADER_PATH;
+var configureLoaderPath = require('../lib/configurator/loader').LOADER_PATH;
 var InMemoryCompiler = require('../lib/modules/MemoryCompiler');
 var mergeConfig = require('webpack-config-merger');
 

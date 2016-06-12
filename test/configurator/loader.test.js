@@ -1,7 +1,7 @@
 require('chai').should();
 var extend = require('extend');
 
-var loader = require('../../lib/configuration/loader');
+var loader = require('../../lib/configurator/loader');
 var configureLoaderPath = loader.LOADER_PATH;
 var MemoryCompiler = require('../../lib/modules/MemoryCompiler');
 

@@ -1,7 +1,7 @@
 var should = require('chai').should();
 var expect = require('chai').expect;
 
-var configure = require('../../lib/configuration');
+var configure = require('../../lib/configurator');
 var createConfig = configure.createConfigFromLoaders;
 var Plugin = require('../../lib/plugin');
 var defaultConfig = require('../../lib/config');
