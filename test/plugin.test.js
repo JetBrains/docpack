@@ -1,6 +1,9 @@
 var chai = require('chai');
-var expect = chai.expect;
+var expect = require('chai').expect;
+var sinon = require('sinon');
+
 chai.should();
+chai.use(require('sinon-chai'));
 
 var Plugin = require('../lib/plugin');
 var HOOKS = require('../lib/hooks');
@@ -154,9 +157,15 @@ describe('Plugin', function () {
         expect(function() {
           plugin.registerExtractor({
             getName: function() { return 'tralala' },
-            extract: function() {}
-          });
+            extract: function() {},
+            apply: function() {
+              var extractor = this;
 
+              compiler.plugin(HOOKS.CONFIGURE, function (plugin) {
+                plugin.registerExtractor(extractor);
+              })
+            }
+          });
         }).to.throw();
 
         done();
@@ -185,7 +194,7 @@ describe('Plugin', function () {
 
   describe('readFile()', function () {
 
-    it('should use the same filesystem as compiler', function() {
+    it('should use the same filesystem with compiler', function() {
       var file = {
         path: '/test.txt',
         content: 'qwe'
@@ -202,4 +211,47 @@ describe('Plugin', function () {
 
   });
 
+
+  describe('addEntry()', function () {
+
+    it('should add entry point to compiler', function() {
+
+    });
+
+  });
+
+
+  describe('apply()', function () {
+
+    it('should fill `config.loaders`', function() {
+      var plugin = new Plugin();
+      var loader = {
+        test: /\.qwe$/,
+        include: /qwe/,
+        exclude: /tralala/,
+        loader: Plugin.extract({option: 1}),
+        customProp: 123
+      };
+
+      inMemoryCompiler({
+        module: { loaders: [loader] },
+        plugins: [plugin]
+      }).run().then(function() {
+        plugin.config.loaders.should.be.an('array').and.have.lengthOf(1);
+      });
+    });
+
+    it('should invoke plugins at HOOKS.CONFIGURE hook in sync mode', function() {
+      var cfgPluginBody = sinon.spy(function() {});
+      var cfgPlugin = {
+        apply: function(compiler) {
+          compiler.plugin(HOOKS.CONFIGURE, cfgPluginBody);
+        }
+      };
+
+      inMemoryCompiler({ plugins: [new Plugin, cfgPlugin] }).run().then(function() {
+        cfgPluginBody.should.have.been.calledOnce;
+      });
+    });
+  });
 });
