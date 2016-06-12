@@ -44,12 +44,13 @@ describe('createConfigFromLoaders()', function() {
       .should.be.a('array').and.be.empty;
   });
 
-  it('should copy test, include and exclude properties', function() {
+  it('should copy `test`, `include` and `exclude` properties, any other will skipped', function() {
     var loaderConfig = {
       test: /\.js$/,
       include: [],
       exclude: [],
-      loader: Plugin.extract()
+      loader: Plugin.extract(),
+      customProp: 123
     };
     var result = createConfig([loaderConfig]);
     var config = result[0];
@@ -58,6 +59,8 @@ describe('createConfigFromLoaders()', function() {
     config.should.have.property('test').and.eql(loaderConfig.test);
     config.should.have.property('include').and.eql(loaderConfig.include);
     config.should.have.property('exclude').and.eql(loaderConfig.exclude);
+    config.should.not.have.property('loader');
+    config.should.not.have.property('customProp');
   });
 
 });
