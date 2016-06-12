@@ -6,7 +6,7 @@ var createConfig = configure.createConfigFromLoaders;
 var Plugin = require('../../lib/plugin');
 var defaultConfig = require('../../lib/config');
 
-describe('configure()', function() {
+describe('configurator()', function() {
 
   it('should use default config if no options presented', function() {
     configure().should.deep.equal(defaultConfig);
@@ -26,7 +26,7 @@ describe('configure()', function() {
 });
 
 
-describe('configure.createConfigFromLoaders', function() {
+describe('createConfigFromLoaders()', function() {
 
   it('should throw when loaders config is not an array', function() {
     expect(function() {
