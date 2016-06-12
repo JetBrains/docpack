@@ -242,16 +242,31 @@ describe('Plugin', function () {
     });
 
     it('should invoke plugins at HOOKS.CONFIGURE hook in sync mode', function() {
-      var cfgPluginBody = sinon.spy(function() {});
+      var spiedPluginBody = sinon.spy();
       var cfgPlugin = {
         apply: function(compiler) {
-          compiler.plugin(HOOKS.CONFIGURE, cfgPluginBody);
+          compiler.plugin(HOOKS.CONFIGURE, spiedPluginBody);
         }
       };
 
       inMemoryCompiler({ plugins: [new Plugin, cfgPlugin] }).run().then(function() {
-        cfgPluginBody.should.have.been.calledOnce;
+        spiedPluginBody.should.have.been.calledOnce;
       });
+    });
+
+    it('should do nothing if no files to process', function() {
+      var spiedPluginBody = sinon.spy();
+      var sourcesCreatedPlugin = {
+        apply: function(compiler) {
+          compiler.plugin('compilation', function(compilation) {
+            compilation.plugin(HOOKS.SOURCES_CREATED, spiedPluginBody);
+          });
+        }
+      };
+
+      inMemoryCompiler({ plugins: [new Plugin, sourcesCreatedPlugin] }).run().then(function() {
+        spiedPluginBody.should.have.callCount(0);
+      })
     });
   });
 });
