@@ -241,22 +241,22 @@ describe('Plugin', function () {
       });
     });
 
-    it('should invoke plugins at HOOKS.CONFIGURE hook in sync mode', function() {
+    it('should invoke plugins at CONFIGURE hook in sync mode', function() {
       var spiedPluginBody = sinon.spy();
-      var cfgPlugin = {
+      var plugin = {
         apply: function(compiler) {
           compiler.plugin(HOOKS.CONFIGURE, spiedPluginBody);
         }
       };
 
-      inMemoryCompiler({ plugins: [new Plugin, cfgPlugin] }).run().then(function() {
+      inMemoryCompiler({ plugins: [new Plugin, plugin] }).run().then(function() {
         spiedPluginBody.should.have.been.calledOnce;
       });
     });
 
     it('should do nothing if no files to process', function() {
       var spiedPluginBody = sinon.spy();
-      var sourcesCreatedPlugin = {
+      var plugin = {
         apply: function(compiler) {
           compiler.plugin('compilation', function(compilation) {
             compilation.plugin(HOOKS.SOURCES_CREATED, spiedPluginBody);
@@ -264,9 +264,41 @@ describe('Plugin', function () {
         }
       };
 
-      inMemoryCompiler({ plugins: [new Plugin, sourcesCreatedPlugin] }).run().then(function() {
-        spiedPluginBody.should.have.callCount(0);
-      })
+      inMemoryCompiler({ plugins: [new Plugin, plugin] }).run().then(function() {
+        spiedPluginBody.should.have.not.been.called;
+      });
     });
+
+    it('should handle SOURCES_CREATED hook', function() {
+      var spiedPluginBody = sinon.spy();
+
+      var plugin = {
+        apply: function(compiler) {
+          compiler.plugin('compilation', function(compilation) {
+            compilation.plugin(HOOKS.SOURCES_CREATED, spiedPluginBody);
+          });
+        }
+      };
+
+      var compiler = inMemoryCompiler({
+        entry: './qwe',
+        module: {
+          loaders: [
+            {
+              test: /\.js$/,
+              loader: Plugin.extract()
+            }
+          ]
+        },
+        plugins: [new Plugin, plugin]
+      });
+
+      compiler.inputFileSystem.writeFileSync('/qwe.js', 'qwe', 'utf-8');
+
+      compiler.run().then(function() {
+        spiedPluginBody.should.have.callCount(1);
+      });
+    });
+
   });
 });
