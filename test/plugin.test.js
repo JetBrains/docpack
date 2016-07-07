@@ -281,7 +281,7 @@ describe('Plugin', function () {
       };
 
       var compiler = inMemoryCompiler({
-        entry: './qwe',
+        entry: './entry',
         module: {
           loaders: [
             {
@@ -293,10 +293,52 @@ describe('Plugin', function () {
         plugins: [new Plugin, plugin]
       });
 
-      compiler.inputFileSystem.writeFileSync('/qwe.js', 'qwe', 'utf-8');
+      compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
 
       compiler.run().then(function() {
         spiedPluginBody.should.have.callCount(1);
+      });
+    });
+
+    it('should filter sources via FILTER_SOURCES hook', function() {
+      var plugin = new Plugin();
+      var filteredSources;
+
+      var filterPlugin = {
+        apply: function(compiler) {
+          compiler.plugin('compilation', function(compilation) {
+            compilation.plugin(HOOKS.FILTER_SOURCES, function(sources, done) {
+
+              var filtered = sources.filter(function(source) {
+                var isEntry1 = source.content.indexOf('entry1') != -1;
+                return isEntry1;
+              });
+
+              filteredSources = filtered;
+              done(null, filtered);
+            });
+          });
+        }
+      };
+
+      var compiler = inMemoryCompiler({
+        entry: ['./entry1', './entry2'],
+        module: {
+          loaders: [
+            {
+              test: /\.js$/,
+              loader: Plugin.extract()
+            }
+          ]
+        },
+        plugins: [plugin, filterPlugin]
+      });
+
+      compiler.inputFileSystem.writeFileSync('/entry1.js', '/*entry1 content*/', 'utf-8');
+      compiler.inputFileSystem.writeFileSync('/entry2.js', '/*entry2 content*/', 'utf-8');
+
+      compiler.run().then(function() {
+        filteredSources.should.be.an('array').and.to.have.lengthOf(1);
       });
     });
 
