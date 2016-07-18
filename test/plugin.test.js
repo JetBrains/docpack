@@ -3,7 +3,9 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 
 chai.should();
-chai.use(require('sinon-chai'));
+chai
+  .use(require('sinon-chai'))
+  .use(require("chai-as-promised"));
 
 var Plugin = require('../lib/plugin');
 var HOOKS = require('../lib/hooks');
@@ -369,6 +371,25 @@ describe('Plugin', function () {
           done();
         })
         .catch(done);
+    });
+
+    it('should reject when extractor not found', function() {
+      var compiler = inMemoryCompiler({
+        entry: './entry',
+        module: {
+          loaders: [
+            {
+              test: /\.js$/,
+              loader: Plugin.extract({extractor: 'tralala'})
+            }
+          ]
+        },
+        plugins: [new Plugin]
+      });
+
+      compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
+
+      return compiler.run().should.be.rejected;
     });
 
   });
