@@ -96,20 +96,24 @@ describe('Plugin', function () {
       });
 
       it('should return config provided in loaders', function (done) {
-        compiler.run().then(function () {
-          var config = plugin.getConfig('/tralala/test.qwe');
-          config.should.have.property('foo');
-          config.foo.should.be.eql('bar');
-          done();
-        });
+        compiler.run()
+          .then(function () {
+            var config = plugin.getConfig('/tralala/test.qwe');
+            config.should.have.property('foo');
+            config.foo.should.be.eql('bar');
+            done();
+          })
+          .catch(done);
       });
 
       it('should return initial config value if no param specified via loaders found', function (done) {
-        compiler.run().then(function () {
-          var config = plugin.getConfig('/tralala');
-          config.should.be.eql(plugin.config.initial);
-          done();
-        });
+        compiler.run()
+          .then(function () {
+            var config = plugin.getConfig('/tralala');
+            config.should.be.eql(plugin.config.initial);
+            done();
+          })
+          .catch(done);
       });
 
     });
@@ -151,26 +155,30 @@ describe('Plugin', function () {
 
       var plugin = new Plugin();
 
-      inMemoryCompiler({plugins: [plugin, extractor]}).run().then(function () {
-        plugin.extractors.should.have.property(extractorName).and.be.eql(extractor);
+      inMemoryCompiler({plugins: [plugin, extractor]}).run()
+        .then(function () {
+          plugin.extractors.should.have.property(extractorName).and.be.eql(extractor);
 
-        expect(function() {
-          plugin.registerExtractor({
-            getName: function() { return 'tralala' },
-            extract: function() {},
-            apply: function() {
-              var extractor = this;
+          expect(function () {
+            plugin.registerExtractor({
+              getName: function () {
+                return 'tralala'
+              },
+              extract: function () {
+              },
+              apply: function () {
+                var extractor = this;
 
-              compiler.plugin(HOOKS.CONFIGURE, function (plugin) {
-                plugin.registerExtractor(extractor);
-              })
-            }
-          });
-        }).to.throw();
+                compiler.plugin(HOOKS.CONFIGURE, function (plugin) {
+                  plugin.registerExtractor(extractor);
+                })
+              }
+            });
+          }).to.throw();
 
-        done();
-      });
-
+          done();
+        })
+        .catch(done);
     });
 
   });
@@ -194,7 +202,7 @@ describe('Plugin', function () {
 
   describe('readFile()', function () {
 
-    it('should use the same filesystem with compiler', function() {
+    it('should use the same filesystem with compiler', function(done) {
       var file = {
         path: '/test.txt',
         content: 'qwe'
@@ -204,9 +212,12 @@ describe('Plugin', function () {
       var compiler = inMemoryCompiler({plugins: [plugin]});
 
       compiler.inputFileSystem.writeFileSync(file.path, file.content, 'utf-8');
-      plugin.readFile(file.path).then(function(content) {
-        content.toString().should.eql(file.content);
-      });
+      plugin.readFile(file.path)
+        .then(function (content) {
+          content.toString().should.eql(file.content);
+          done();
+        })
+        .catch(done);
     })
 
   });
@@ -223,7 +234,7 @@ describe('Plugin', function () {
 
   describe('apply()', function () {
 
-    it('should fill `config.loaders`', function() {
+    it('should fill `config.loaders`', function(done) {
       var plugin = new Plugin();
       var loader = {
         test: /\.qwe$/,
@@ -236,12 +247,16 @@ describe('Plugin', function () {
       inMemoryCompiler({
         module: { loaders: [loader] },
         plugins: [plugin]
-      }).run().then(function() {
-        plugin.config.loaders.should.be.an('array').and.have.lengthOf(1);
-      });
+      })
+        .run()
+        .then(function () {
+          plugin.config.loaders.should.be.an('array').and.have.lengthOf(1);
+          done();
+        })
+        .catch(done);
     });
 
-    it('should invoke plugins at CONFIGURE hook in sync mode', function() {
+    it('should invoke plugins at CONFIGURE hook in sync mode', function(done) {
       var spiedPluginBody = sinon.spy();
       var plugin = {
         apply: function(compiler) {
@@ -249,12 +264,15 @@ describe('Plugin', function () {
         }
       };
 
-      inMemoryCompiler({ plugins: [new Plugin, plugin] }).run().then(function() {
-        spiedPluginBody.should.have.been.calledOnce;
-      });
+      inMemoryCompiler({plugins: [new Plugin, plugin]}).run()
+        .then(function () {
+          spiedPluginBody.should.have.been.calledOnce;
+          done();
+        })
+        .catch(done)
     });
 
-    it('should do nothing if no files to process', function() {
+    it('should do nothing if no files to process', function(done) {
       var spiedPluginBody = sinon.spy();
       var plugin = {
         apply: function(compiler) {
@@ -264,13 +282,18 @@ describe('Plugin', function () {
         }
       };
 
-      inMemoryCompiler({ plugins: [new Plugin, plugin] }).run().then(function() {
-        spiedPluginBody.should.have.not.been.called;
-      });
+      inMemoryCompiler({plugins: [new Plugin, plugin]}).run()
+        .then(function () {
+          spiedPluginBody.should.have.not.been.called;
+          done();
+        })
+        .catch(done);
     });
 
-    it('should handle SOURCES_CREATED hook', function() {
-      var spiedPluginBody = sinon.spy();
+    it('should handle SOURCES_CREATED hook', function(done) {
+      var spiedPluginBody = sinon.spy(function(sources, done) {
+        done();
+      });
 
       var plugin = {
         apply: function(compiler) {
@@ -295,12 +318,15 @@ describe('Plugin', function () {
 
       compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
 
-      compiler.run().then(function() {
-        spiedPluginBody.should.have.callCount(1);
-      });
+      compiler.run()
+        .then(function () {
+          spiedPluginBody.should.have.callCount(1);
+          done();
+        })
+        .catch(done);
     });
 
-    it('should filter sources via FILTER_SOURCES hook', function() {
+    it('should filter sources via FILTER_SOURCES hook', function(done) {
       var plugin = new Plugin();
       var filteredSources;
 
@@ -337,9 +363,12 @@ describe('Plugin', function () {
       compiler.inputFileSystem.writeFileSync('/entry1.js', '/*entry1 content*/', 'utf-8');
       compiler.inputFileSystem.writeFileSync('/entry2.js', '/*entry2 content*/', 'utf-8');
 
-      compiler.run().then(function() {
-        filteredSources.should.be.an('array').and.to.have.lengthOf(1);
-      });
+      compiler.run()
+        .then(function () {
+          filteredSources.should.be.an('array').and.to.have.lengthOf(1);
+          done();
+        })
+        .catch(done);
     });
 
   });
