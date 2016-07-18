@@ -43,10 +43,12 @@ describe('configure loader', function() {
     var compiler = createCompiler({entry: {test: './test'}});
     compiler.inputFileSystem.writeFileSync('/test.js', entryContent, 'utf-8');
 
-    compiler.run().then(function(compilation) {
-      compilation.assets.test.source().should.contain(entryContent);
-      done();
-    })
+    compiler.run()
+      .then(function (compilation) {
+        compilation.assets.test.source().should.contain(entryContent);
+        done();
+      })
+      .catch(done)
   });
 
   it('should skip files with configured loaders', function (done) {
@@ -56,10 +58,12 @@ describe('configure loader', function() {
     var compiler = createCompiler({entry: {test: './test.source-with-prefix-loader'}});
     compiler.inputFileSystem.writeFileSync('/test.source-with-prefix-loader', entryContent, 'utf-8');
 
-    compiler.run().then(function (compilation) {
-      compilation.assets.test.source().should.contain(entryContentWithPrefix);
-      done();
-    })
+    compiler.run()
+      .then(function (compilation) {
+        compilation.assets.test.source().should.contain(entryContentWithPrefix);
+        done();
+      })
+      .catch(done);
   });
 
   it('should not return any result for files without configured loaders', function (done) {
@@ -68,10 +72,12 @@ describe('configure loader', function() {
     var compiler = createCompiler({entry: {test: './test.svg'}});
     compiler.inputFileSystem.writeFileSync('/test.svg', entryContent, 'utf-8');
 
-    compiler.run().then(function(compilation) {
-      compilation.assets.test.source().should.not.contain(entryContent);
-      done();
-    })
+    compiler.run()
+      .then(function (compilation) {
+        compilation.assets.test.source().should.not.contain(entryContent);
+        done();
+      })
+      .catch(done);
   });
 
 });
