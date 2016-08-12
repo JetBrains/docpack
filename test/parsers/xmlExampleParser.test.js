@@ -57,6 +57,11 @@ describe('xmlExampleParser', function() {
     result.source.should.be.a('string').and.eql('\nvar foo = "bar<tag></tag>";\n\n');
   });
 
+  it('should allow < signs inside <file> tags', function () {
+    var result = parseAndGetFirstFile('<example><file>for (var i = 0; i < length; i++) {}</file></example>');
+    result.source.should.be.a('string').and.eql('for (var i = 0; i < length; i++) {}');
+  });
+
   it('should detect file type by name attr', function () {
     var result = parseAndGetFirstFile('<example><file name="index.html">c</file></example>');
     result.type.should.be.eql('html');
