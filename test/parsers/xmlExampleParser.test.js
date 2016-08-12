@@ -52,9 +52,9 @@ describe('xmlExampleParser', function() {
     })
   });
 
-  it('should not modify file content', function () {
+  it('should not modify file content (strip indents only)', function () {
     var result = parseAndGetFirstFile('<example><file>\n  var foo = "bar<tag></tag>";\n\n</file></example>');
-    result.source.should.be.a('string').and.eql('\n  var foo = "bar<tag></tag>";\n\n');
+    result.source.should.be.a('string').and.eql('\nvar foo = "bar<tag></tag>";\n\n');
   });
 
   it('should detect file type by name attr', function () {
