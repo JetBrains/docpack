@@ -57,16 +57,40 @@ describe('Plugin', function () {
 
   });
 
+  describe('::createPlugin()', function () {
+    it('should exist', function() {
+      Plugin.createPlugin.should.exist.and.be.a('function');
+    });
+
+    it('should throw when required fields not specified', function() {
+      expect(function() { Plugin.createPlugin() }).to.throw();
+    });
+
+    it('should be a factory to create plugins', function() {
+      var pluginData = {
+        name: 'tralala',
+        defaultOptions: {foo: 'bar'},
+        apply: function() {}
+      };
+
+      var plugin = Plugin.createPlugin(pluginData);
+      var instance = new plugin();
+
+      instance.should.have.a.property('getName');
+      instance.getName.should.be.a('function');
+      instance.getName().should.eql(pluginData.name);
+      instance.options.should.be.an('object').and.be.eql(pluginData.defaultOptions);
+      instance.apply.should.be.an('function');
+    });
+  });
 
   describe('constructor', function () {
-
     it('should set initial config', function () {
       var plugin = new Plugin();
       plugin.should.have.property('config').and.be.an('object');
       plugin.should.have.property('extractors').and.be.an('object');
       plugin.config.should.have.property('loaders').and.be.an('array');
     });
-
   });
 
 
