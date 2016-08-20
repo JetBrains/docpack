@@ -74,7 +74,7 @@ describe('Plugin', function () {
       };
 
       var plugin = Plugin.createPlugin(pluginData);
-      var instance = new plugin();
+      var instance = plugin();
 
       instance.should.have.a.property('getName');
       instance.getName.should.be.a('function');
