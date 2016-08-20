@@ -258,27 +258,11 @@ describe('Plugin', function () {
         .catch(done);
     });
 
-    it('should invoke plugins at CONFIGURE hook in sync mode', function(done) {
+    it('should do nothing if no files to process', function (done) {
       var spiedPluginBody = sinon.spy();
       var plugin = {
-        apply: function(compiler) {
-          compiler.plugin(HOOKS.CONFIGURE, spiedPluginBody);
-        }
-      };
-
-      inMemoryCompiler({plugins: [new Plugin, plugin]}).run()
-        .then(function () {
-          spiedPluginBody.should.have.been.calledOnce;
-          done();
-        })
-        .catch(done)
-    });
-
-    it('should do nothing if no files to process', function(done) {
-      var spiedPluginBody = sinon.spy();
-      var plugin = {
-        apply: function(compiler) {
-          compiler.plugin('compilation', function(compilation) {
+        apply: function (compiler) {
+          compiler.plugin('compilation', function (compilation) {
             compilation.plugin(HOOKS.SOURCES_CREATED, spiedPluginBody);
           });
         }
@@ -292,105 +276,90 @@ describe('Plugin', function () {
         .catch(done);
     });
 
-    it('should handle SOURCES_CREATED hook', function(done) {
-      var spiedPluginBody = sinon.spy(function(sources, done) {
-        done();
+    describe('Hook: CONFIGURE', function () {
+      it('should be called', function (done) {
+        var spiedPluginBody = sinon.spy();
+        var plugin = {
+          apply: function (compiler) {
+            compiler.plugin(HOOKS.CONFIGURE, spiedPluginBody);
+          }
+        };
+
+        inMemoryCompiler({plugins: [new Plugin, plugin]}).run()
+          .then(function () {
+            spiedPluginBody.should.have.been.calledOnce;
+            done();
+          })
+          .catch(done)
       });
-
-      var plugin = {
-        apply: function(compiler) {
-          compiler.plugin('compilation', function(compilation) {
-            compilation.plugin(HOOKS.SOURCES_CREATED, spiedPluginBody);
-          });
-        }
-      };
-
-      var compiler = inMemoryCompiler({
-        entry: './entry',
-        module: {
-          loaders: [
-            {
-              test: /\.js$/,
-              loader: Plugin.extract()
-            }
-          ]
-        },
-        plugins: [new Plugin, plugin]
-      });
-
-      compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
-
-      compiler.run()
-        .then(function () {
-          spiedPluginBody.should.have.callCount(1);
-          done();
-        })
-        .catch(done);
     });
 
-    it('should filter sources via FILTER_SOURCES hook', function(done) {
-      var plugin = new Plugin();
-      var filteredSources;
+    describe('Hook: FILTER_SOURCES', function () {
+      it('should filter sources', function(done) {
+        var plugin = new Plugin();
+        var filteredSources;
 
-      var filterPlugin = {
-        apply: function(compiler) {
-          compiler.plugin('compilation', function(compilation) {
-            compilation.plugin(HOOKS.FILTER_SOURCES, function(sources, done) {
+        var filterPlugin = {
+          apply: function(compiler) {
+            compiler.plugin('compilation', function(compilation) {
+              compilation.plugin(HOOKS.FILTER_SOURCES, function(sources, done) {
 
-              var filtered = sources.filter(function(source) {
-                var isEntry1 = source.content.indexOf('entry1') != -1;
-                return isEntry1;
+                var filtered = sources.filter(function(source) {
+                  var isEntry1 = source.content.indexOf('entry1') != -1;
+                  return isEntry1;
+                });
+
+                filteredSources = filtered;
+                done(null, filtered);
               });
-
-              filteredSources = filtered;
-              done(null, filtered);
             });
-          });
-        }
-      };
+          }
+        };
 
-      var compiler = inMemoryCompiler({
-        entry: ['./entry1', './entry2'],
-        module: {
-          loaders: [
-            {
-              test: /\.js$/,
-              loader: Plugin.extract()
-            }
-          ]
-        },
-        plugins: [plugin, filterPlugin]
+        var compiler = inMemoryCompiler({
+          entry: ['./entry1', './entry2'],
+          module: {
+            loaders: [
+              {
+                test: /\.js$/,
+                loader: Plugin.extract()
+              }
+            ]
+          },
+          plugins: [plugin, filterPlugin]
+        });
+
+        compiler.inputFileSystem.writeFileSync('/entry1.js', '/*entry1 content*/', 'utf-8');
+        compiler.inputFileSystem.writeFileSync('/entry2.js', '/*entry2 content*/', 'utf-8');
+
+        compiler.run()
+          .then(function () {
+            filteredSources.should.be.an('array').and.to.have.lengthOf(1);
+            done();
+          })
+          .catch(done);
       });
-
-      compiler.inputFileSystem.writeFileSync('/entry1.js', '/*entry1 content*/', 'utf-8');
-      compiler.inputFileSystem.writeFileSync('/entry2.js', '/*entry2 content*/', 'utf-8');
-
-      compiler.run()
-        .then(function () {
-          filteredSources.should.be.an('array').and.to.have.lengthOf(1);
-          done();
-        })
-        .catch(done);
     });
 
-    it('should reject when extractor not found', function() {
-      var compiler = inMemoryCompiler({
-        entry: './entry',
-        module: {
-          loaders: [
-            {
-              test: /\.js$/,
-              loader: Plugin.extract({extractor: 'tralala'})
-            }
-          ]
-        },
-        plugins: [new Plugin]
+    describe('Extracting', function () {
+      it('should reject when extractor not found', function () {
+        var compiler = inMemoryCompiler({
+          entry: './entry',
+          module: {
+            loaders: [
+              {
+                test: /\.js$/,
+                loader: Plugin.extract({extractor: 'tralala'})
+              }
+            ]
+          },
+          plugins: [new Plugin]
+        });
+
+        compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
+
+        return compiler.run().should.be.rejected;
       });
-
-      compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
-
-      return compiler.run().should.be.rejected;
     });
-
   });
 });
