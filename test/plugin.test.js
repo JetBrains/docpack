@@ -151,14 +151,10 @@ describe('Plugin', function () {
           })
           .catch(done);
       });
-
     });
-
   });
 
-
   describe('registerExtractor()', function () {
-
     it('should throw if invalid extractor structure provided', function() {
       var extractor = {
         apply: function (compiler) {
@@ -216,12 +212,9 @@ describe('Plugin', function () {
         })
         .catch(done);
     });
-
   });
 
-
   describe('save()', function () {
-
     it('should save source', function() {
       var source = new Source({path: '/qwe', absolutePath: '/qwe', content: 'qwe'});
       var plugin = new Plugin();
@@ -232,12 +225,9 @@ describe('Plugin', function () {
       plugin.save(source);
       plugin.sources.should.include(source).and.to.have.lengthOf(1);
     })
-
   });
 
-
   describe('readFile()', function () {
-
     it('should use the same filesystem with compiler', function(done) {
       var file = {
         path: '/test.txt',
@@ -255,21 +245,14 @@ describe('Plugin', function () {
         })
         .catch(done);
     })
-
   });
-
 
   describe('addEntry()', function () {
-
     it('should add entry point to compiler', function() {
-
     });
-
   });
 
-
   describe('apply()', function () {
-
     it('should fill `config.loaders`', function(done) {
       var plugin = new Plugin();
       var loader = {
