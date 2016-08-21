@@ -34,6 +34,28 @@ function inMemoryCompiler(config) {
   return compiler;
 }
 
+/**
+ * @param {Object} createOptions
+ * @param {String} createOptions.name
+ * @param {Function} createOptions.extract
+ * @param {Object} [createOptions.defaultOptions]
+ */
+function createExtractor(createOptions) {
+  var plugin = createPlugin(createOptions);
+
+  plugin.prototype.apply = function (compiler) {
+    var extractorPlugin = this;
+
+    compiler.plugin(HOOKS.CONFIGURE, function (plugin) {
+      plugin.registerExtractor(extractorPlugin);
+    });
+  };
+
+  plugin.prototype.extract = createOptions.extract;
+
+  return plugin;
+}
+
 describe('Plugin', function () {
 
   describe('static props', function () {
@@ -363,14 +385,29 @@ describe('Plugin', function () {
     });
 
     describe('Extracting', function () {
-      it('should reject when extractor not found', function () {
+      var extractor;
+      var extractorName = 'qwe';
+      var extractorDefaultOptions = {
+        foo: 'bar'
+      };
+
+      beforeEach(function() {
+        extractor = createExtractor({
+          name: extractorName,
+          defaultOptions: extractorDefaultOptions,
+          extract: function() {}
+        });
+      });
+
+      // TODO: rewrite this test to check plugin results instead of promise result
+      it('should skip if extractor not defined', function(done) {
         var compiler = inMemoryCompiler({
           entry: './entry',
           module: {
             loaders: [
               {
                 test: /\.js$/,
-                loader: Plugin.extract({extractor: 'tralala'})
+                loader: Plugin.extract()
               }
             ]
           },
@@ -379,8 +416,68 @@ describe('Plugin', function () {
 
         compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
 
-        return compiler.run().should.be.rejected;
+        compiler.run()
+          .should.be.fulfilled
+          .and.notify(done);
       });
+
+      it('should reject when extractor not found', function (done) {
+        var compiler = inMemoryCompiler({
+          entry: './entry',
+          module: {
+            loaders: [
+              {
+                test: /\.js$/,
+                loader: Plugin.extract({extractor: 'qwe'})
+              }
+            ]
+          },
+          plugins: [new Plugin]
+        });
+
+        compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
+
+        compiler.run()
+          .should.be.rejectedWith(Error, 'not found')
+          .and.notify(done);
+      });
+
+      it('should use default options', function(done) {
+        var instance = extractor();
+        instance.extract = sinon.spy(instance.extract);
+
+        var compiler = inMemoryCompiler({
+          entry: './entry',
+          module: {
+            loaders: [
+              {
+                test: /\.js$/,
+                loader: Plugin.extract({extractor: extractorName})
+              }
+            ]
+          },
+          plugins: [new Plugin, instance]
+        });
+
+        compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
+
+        compiler.run()
+          .then(function () {
+            instance.extract.firstCall.args[1].should.be.eql(extractorDefaultOptions);
+            done();
+          })
+          .catch(done);
+      });
+
+      it('should use options from loader', function() {
+
+      });
+
+      it('should skip null results from extractor', function() {
+
+      });
+
+
     });
   });
 });
