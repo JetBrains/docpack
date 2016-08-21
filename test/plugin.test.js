@@ -93,6 +93,10 @@ describe('Plugin', function () {
   });
 
   describe('constructor', function () {
+    it('should allow to create instance via function call', function() {
+      Plugin().should.be.instanceof(Plugin);
+    });
+
     it('should set initial config', function () {
       var plugin = new Plugin();
       plugin.should.have.property('config').and.be.an('object');
@@ -104,10 +108,6 @@ describe('Plugin', function () {
   describe('getConfig()', function () {
     it('should exist', function () {
       new Plugin().getConfig.should.exist;
-    });
-
-    it('should allow to create instance via function call', function() {
-      Plugin().should.be.instanceof(Plugin);
     });
 
     it('should return initial config if no arguments specified', function () {
