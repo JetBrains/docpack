@@ -13,6 +13,7 @@ var configureLoaderPath = require('../lib/configurator/loader').LOADER_PATH;
 var InMemoryCompiler = require('../lib/modules/MemoryCompiler');
 var mergeConfig = require('webpack-config-merger');
 var Source = require('../lib/data/Source');
+var createPlugin = require('../lib/utils/createPlugin');
 
 function inMemoryCompiler(config) {
   var defaultConfig = {
@@ -39,9 +40,7 @@ describe('Plugin', function () {
     Plugin.should.have.property('HOOKS').and.be.a('object').and.eql(HOOKS);
   });
 
-
   describe('::extract()', function () {
-
     it('should exist', function () {
       Plugin.extract.should.exist.and.be.a('function');
     });
@@ -54,7 +53,6 @@ describe('Plugin', function () {
       var params = {qwe: 123};
       Plugin.extract({qwe: 123}).should.contain(JSON.stringify(params));
     });
-
   });
 
   describe('::createPlugin()', function () {
@@ -82,6 +80,16 @@ describe('Plugin', function () {
       instance.options.should.be.an('object').and.be.eql(pluginData.defaultOptions);
       instance.apply.should.be.an('function');
     });
+
+    it('should allow to create instance via new operator & with function call', function() {
+      var plugin = Plugin.createPlugin({name: 'qwe'});
+      new plugin().should.be.instanceof(plugin);
+    });
+
+    it('should allow to create instance via function call', function() {
+      var plugin = Plugin.createPlugin({name: 'qwe'});
+      plugin().should.be.instanceof(plugin);
+    });
   });
 
   describe('constructor', function () {
@@ -93,14 +101,16 @@ describe('Plugin', function () {
     });
   });
 
-
   describe('getConfig()', function () {
-
     it('should exist', function () {
       new Plugin().getConfig.should.exist;
     });
 
-    it('should return initial config if no argument specified', function () {
+    it('should allow to create instance via function call', function() {
+      Plugin().should.be.instanceof(Plugin);
+    });
+
+    it('should return initial config if no arguments specified', function () {
       var plugin = new Plugin();
       plugin.getConfig().should.eql(plugin.config.initial);
     });
