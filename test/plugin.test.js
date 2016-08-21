@@ -443,8 +443,8 @@ describe('Plugin', function () {
       });
 
       it('should use default options', function(done) {
-        var instance = extractor();
-        instance.extract = sinon.spy(instance.extract);
+        var extractorInstance = extractor();
+        extractorInstance.extract = sinon.spy(extractorInstance.extract);
 
         var compiler = inMemoryCompiler({
           entry: './entry',
@@ -456,14 +456,14 @@ describe('Plugin', function () {
               }
             ]
           },
-          plugins: [new Plugin, instance]
+          plugins: [new Plugin, extractorInstance]
         });
 
         compiler.inputFileSystem.writeFileSync('/entry.js', 'qwe', 'utf-8');
 
         compiler.run()
           .then(function () {
-            instance.extract.firstCall.args[1].should.be.eql(extractorDefaultOptions);
+            extractorInstance.extract.firstCall.args[1].should.be.eql(extractorDefaultOptions);
             done();
           })
           .catch(done);
