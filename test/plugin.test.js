@@ -90,6 +90,10 @@ describe('Plugin', function () {
       var plugin = Plugin.createPlugin({name: 'qwe'});
       plugin().should.be.instanceof(plugin);
     });
+
+    it('`instanceof Plugin` works on all instances properly', function() {
+      Plugin.createPlugin({name: 'qwe'})().should.be.instanceof(Plugin.createPlugin.Plugin);
+    });
   });
 
   describe('constructor', function () {
