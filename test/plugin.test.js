@@ -384,6 +384,24 @@ describe('Plugin', function () {
       });
     });
 
+    describe('Hook: FILTER_EXTRACTED_RESULTS', function () {
+      it('should filter sources after extraction was done', function() {
+
+      });
+    });
+
+    describe('Hook: PROCESS_EXTRACTED_RESULTS', function () {
+      it('should allow to modify sources after extraction was done', function() {
+
+      });
+    });
+
+    describe('Hook: EMIT_RESULTS', function () {
+      it('should be called at the final step', function() {
+
+      });
+    });
+
     describe('Extracting', function () {
       var extractor;
       var extractorName = 'qwe';
@@ -476,8 +494,6 @@ describe('Plugin', function () {
       it('should skip null results from extractor', function() {
 
       });
-
-
     });
   });
 });
