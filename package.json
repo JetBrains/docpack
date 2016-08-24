@@ -50,6 +50,7 @@
     "strip-indent": "2.0.0",
     "traverse": "0.6.6",
     "twig": "0.8.9",
+    "url-slug": "2.0.0",
     "webpack": "^1.12.10"
   }
 }
