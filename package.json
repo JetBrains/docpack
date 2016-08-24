@@ -1,6 +1,6 @@
 {
   "name": "webpack-docs-plugin",
-  "version": "1.0.9-alpha",
+  "version": "1.0.10-alpha",
   "description": "Webpack Docs plugin",
   "main": "lib/plugin.js",
   "scripts": {
