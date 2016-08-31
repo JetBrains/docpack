@@ -47,7 +47,7 @@
     "merge-options": "0.0.64",
     "remarkable": "1.6.2",
     "sax": "1.2.1",
-    "strip-indent": "2.0.0",
+    "strip-indent": "1.0.1",
     "traverse": "0.6.6",
     "twig": "0.8.9",
     "url-slug": "2.0.0",
