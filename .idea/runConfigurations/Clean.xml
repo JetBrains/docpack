@@ -5,6 +5,7 @@
     <scripts>
       <script value="clean" />
     </scripts>
+    <node-interpreter value="project" />
     <envs />
     <method />
   </configuration>
