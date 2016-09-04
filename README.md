@@ -1,4 +1,3 @@
-# Webpack Docs Plugin
+# Docpack
 
-Plugin to extract documentation from your sources.
-Under heavy development, for now you can only check example `npm run example` or run tests `npm test`.
+Webpack plugin to extract and generate documentation from your sources.

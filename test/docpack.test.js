@@ -7,7 +7,7 @@ chai
   .use(require('sinon-chai'))
   .use(require("chai-as-promised"));
 
-var Plugin = require('../lib/plugin');
+var Plugin = require('../lib/docpack');
 var HOOKS = require('../lib/hooks');
 var configureLoaderPath = require('../lib/configurator/loader').LOADER_PATH;
 var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
@@ -56,7 +56,7 @@ function createExtractor(name, createOptions) {
   return plugin;
 }
 
-describe('Plugin', function () {
+describe('Docpack', function () {
 
   describe('static props', function () {
     Plugin.should.have.property('HOOKS').and.be.a('object').and.eql(HOOKS);

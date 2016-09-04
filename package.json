@@ -1,27 +1,29 @@
 {
-  "name": "webpack-docs-plugin",
-  "version": "1.0.5-alpha",
-  "description": "Webpack Docs plugin",
-  "main": "lib/plugin.js",
+  "name": "docpack",
+  "version": "1.0.0-alpha",
+  "description": "Webpack plugin to extract and generate documentation from your sources",
+  "keywords": [
+    "webpack",
+    "plugin",
+    "documetation"
+  ],
+  "main": "lib/docpack.js",
   "scripts": {
-    "test": "mocha test/*.test.js",
-    "clean": "rimraf ./build",
-    "example": "npm run clean && webpack --config test/fixtures/plugin/webpack.config.js"
+    "test": "mocha test/*.test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kisenka/webpack-docs-plugin.git"
+    "url": "git+https://github.com/kisenka/docpack.git"
   },
   "author": "kisenka",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kisenka/webpack-docs-plugin/issues"
+    "url": "https://github.com/kisenka/docpack/issues"
   },
-  "homepage": "https://github.com/kisenka/webpack-docs-plugin#readme",
+  "homepage": "https://github.com/kisenka/docpack#readme",
   "files": [
-    "lib/",
+    "lib",
     "README.md",
-    "TODO.md",
     "typedefs.js"
   ],
   "devDependencies": {
@@ -44,7 +46,6 @@
     "js-beautify": "1.6.2",
     "js-yaml": "3.6.0",
     "loader-utils": "0.2.14",
-    "memory-fs": "0.3.0",
     "merge-options": "0.0.64",
     "posthtml-parser": "0.1.3",
     "posthtml-render": "1.0.6",

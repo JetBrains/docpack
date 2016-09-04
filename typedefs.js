@@ -11,12 +11,12 @@
  */
 
 /**
- * @typedef {Function} DocsPluginExtractor
+ * @typedef {Function} DocpackExtractor
  * @returns {Promise}
  */
 
 /**
- * @typedef {Object} DocsPluginExtractorContext
+ * @typedef {Object} DocpackExtractorContext
  * @property {Source} source
  * @property {Compilation} compilation
  * @property {Compiler} compiler

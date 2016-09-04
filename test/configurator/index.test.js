@@ -3,7 +3,7 @@ var expect = require('chai').expect;
 
 var configure = require('../../lib/configurator');
 var createConfig = configure.createConfigFromLoaders;
-var Plugin = require('../../lib/plugin');
+var Plugin = require('../../lib/docpack');
 var defaultConfig = require('../../lib/config');
 
 describe('configurator()', function() {
