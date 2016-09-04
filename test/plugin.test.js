@@ -35,13 +35,13 @@ function inMemoryCompiler(config) {
 }
 
 /**
+ * @param {String} name
  * @param {Object} createOptions
- * @param {String} createOptions.name
  * @param {Function} createOptions.extract
  * @param {Object} [createOptions.defaultOptions]
  */
-function createExtractor(createOptions) {
-  var plugin = createPlugin(createOptions);
+function createExtractor(name, createOptions) {
+  var plugin = createPlugin(name, createOptions);
 
   plugin.prototype.apply = function (compiler) {
     var extractorPlugin = this;
@@ -87,34 +87,34 @@ describe('Plugin', function () {
     });
 
     it('should be a factory to create plugins', function() {
+      var pluginName = 'tralala';
       var pluginData = {
-        name: 'tralala',
         defaultOptions: {foo: 'bar'},
         apply: function() {}
       };
 
-      var plugin = Plugin.createPlugin(pluginData);
+      var plugin = Plugin.createPlugin(pluginName, pluginData);
       var instance = plugin();
 
       instance.should.have.a.property('getName');
       instance.getName.should.be.a('function');
-      instance.getName().should.eql(pluginData.name);
+      instance.getName().should.eql(pluginName);
       instance.options.should.be.an('object').and.be.eql(pluginData.defaultOptions);
       instance.apply.should.be.an('function');
     });
 
     it('should allow to create instance via new operator & with function call', function() {
-      var plugin = Plugin.createPlugin({name: 'qwe'});
+      var plugin = Plugin.createPlugin('qwe');
       new plugin().should.be.instanceof(plugin);
     });
 
     it('should allow to create instance via function call', function() {
-      var plugin = Plugin.createPlugin({name: 'qwe'});
+      var plugin = Plugin.createPlugin('qwe');
       plugin().should.be.instanceof(plugin);
     });
 
     it('`instanceof Plugin` works on all instances properly', function() {
-      Plugin.createPlugin({name: 'qwe'})().should.be.instanceof(Plugin.createPlugin.Plugin);
+      Plugin.createPlugin('qwe')().should.be.instanceof(Plugin.createPlugin.Plugin);
     });
   });
 
@@ -410,8 +410,7 @@ describe('Plugin', function () {
       };
 
       beforeEach(function() {
-        extractor = createExtractor({
-          name: extractorName,
+        extractor = createExtractor(extractorName, {
           defaultOptions: extractorDefaultOptions,
           extract: function() {}
         });
