@@ -51,6 +51,7 @@
     "remarkable": "1.6.2",
     "traverse": "0.6.6",
     "twig": "0.8.9",
-    "webpack": "^1.12.10"
+    "webpack": "^1.12.10",
+    "webpack-toolkit": "0.0.3"
   }
 }

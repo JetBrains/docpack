@@ -3,7 +3,7 @@ var extend = require('extend');
 
 var loader = require('../../lib/configurator/loader');
 var configureLoaderPath = loader.LOADER_PATH;
-var MemoryCompiler = require('../../lib/modules/MemoryCompiler');
+var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
 
 function createCompiler(options) {
   var opts = extend(true, {
@@ -27,7 +27,7 @@ function createCompiler(options) {
     }
   }, options || {});
 
-  return new MemoryCompiler(opts, true, true);
+  return new InMemoryCompiler(opts, true, true);
 }
 
 

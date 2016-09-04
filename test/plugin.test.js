@@ -10,7 +10,7 @@ chai
 var Plugin = require('../lib/plugin');
 var HOOKS = require('../lib/hooks');
 var configureLoaderPath = require('../lib/configurator/loader').LOADER_PATH;
-var InMemoryCompiler = require('../lib/modules/MemoryCompiler');
+var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
 var mergeConfig = require('webpack-config-merger');
 var Source = require('../lib/data/Source');
 var createPlugin = require('../lib/utils/createPlugin');
