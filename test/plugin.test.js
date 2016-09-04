@@ -312,53 +312,6 @@ describe('Plugin', function () {
       });
     });
 
-    describe('Hook: FILTER_SOURCES', function () {
-      it('should filter sources', function(done) {
-        var plugin = new Plugin();
-        var filteredSources;
-
-        var filterPlugin = {
-          apply: function(compiler) {
-            compiler.plugin('compilation', function(compilation) {
-              compilation.plugin(HOOKS.FILTER_SOURCES, function(sources, done) {
-
-                var filtered = sources.filter(function(source) {
-                  var isEntry1 = source.content.indexOf('entry1') != -1;
-                  return isEntry1;
-                });
-
-                filteredSources = filtered;
-                done(null, filtered);
-              });
-            });
-          }
-        };
-
-        var compiler = inMemoryCompiler({
-          entry: ['./entry1', './entry2'],
-          module: {
-            loaders: [
-              {
-                test: /\.js$/,
-                loader: Plugin.extract()
-              }
-            ]
-          },
-          plugins: [plugin, filterPlugin]
-        });
-
-        compiler.inputFileSystem.writeFileSync('/entry1.js', '/*entry1 content*/', 'utf-8');
-        compiler.inputFileSystem.writeFileSync('/entry2.js', '/*entry2 content*/', 'utf-8');
-
-        compiler.run()
-          .then(function () {
-            filteredSources.should.be.an('array').and.to.have.lengthOf(1);
-            done();
-          })
-          .catch(done);
-      });
-    });
-
     describe('Hook: FILTER_EXTRACTED_RESULTS', function () {
       it('should filter sources after extraction was done', function() {
 
