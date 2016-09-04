@@ -312,13 +312,13 @@ describe('Plugin', function () {
       });
     });
 
-    describe('Hook: PROCESS_EXTRACTED_RESULTS', function () {
+    describe('Hook: PROCESS', function () {
       it('should allow to modify sources after extraction was done', function() {
 
       });
     });
 
-    describe('Hook: EMIT_RESULTS', function () {
+    describe('Hook: EMIT', function () {
       it('should be called at the final step', function() {
 
       });
