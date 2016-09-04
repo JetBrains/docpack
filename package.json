@@ -52,6 +52,6 @@
     "traverse": "0.6.6",
     "twig": "0.8.9",
     "webpack": "^1.12.10",
-    "webpack-toolkit": "0.0.3"
+    "webpack-toolkit": "0.1.0"
   }
 }
