@@ -253,31 +253,6 @@ describe('Plugin', function () {
     })
   });
 
-  describe('readFile()', function () {
-    it('should use the same filesystem with compiler', function(done) {
-      var file = {
-        path: '/test.txt',
-        content: 'qwe'
-      };
-
-      var plugin = new Plugin();
-      var compiler = inMemoryCompiler({plugins: [plugin]});
-
-      compiler.inputFileSystem.writeFileSync(file.path, file.content, 'utf-8');
-      plugin.readFile(file.path)
-        .then(function (content) {
-          content.toString().should.eql(file.content);
-          done();
-        })
-        .catch(done);
-    })
-  });
-
-  describe('addEntry()', function () {
-    it('should add entry point to compiler', function() {
-    });
-  });
-
   describe('apply()', function () {
     it('should fill `config.loaders`', function(done) {
       var plugin = new Plugin();
