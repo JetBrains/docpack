@@ -312,12 +312,6 @@ describe('Plugin', function () {
       });
     });
 
-    describe('Hook: FILTER_EXTRACTED_RESULTS', function () {
-      it('should filter sources after extraction was done', function() {
-
-      });
-    });
-
     describe('Hook: PROCESS_EXTRACTED_RESULTS', function () {
       it('should allow to modify sources after extraction was done', function() {
 
