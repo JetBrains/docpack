@@ -5,7 +5,7 @@ var format = require('util').format;
 
 var CodeBlock = require('docpack/lib/data/CodeBlock');
 var Example = require('docpack/lib/data/Example');
-var xmlExampleParser = require('./parseXMLExamples');
+var parseXMLExample = require('./parseXMLExamples');
 
 /**
  * @param {Source} source
@@ -46,7 +46,7 @@ module.exports = function extract(source) {
     }
 
     // Tags
-    tags && record.tags.forEach(function(tag) {
+    tags && record.tags.forEach(function(tag, i) {
       var tagName = tag.type;
       var tagContent = tag.string;
 
@@ -58,21 +58,31 @@ module.exports = function extract(source) {
           break;
 
         case 'example':
-          var examples = xmlExampleParser(tagContent);
+          var examples = parseXMLExample(tagContent);
           if (examples.length == 0) {
             examples.push(new Example({content: tagContent}));
           }
+
           codeBlock.examples = codeBlock.examples.concat(examples);
           break;
 
         case 'example-file':
-          var exampleFilePath = path.resolve( path.dirname(source.absolutePath), tagContent );
-          extractor.addDependency(exampleFilePath);
+          var filepath = path.resolve( path.dirname(source.absolutePath), tagContent );
+          var promise = extractor.readFile(filepath)
+            .then(function (content) {
+              extractor.addDependency(filepath);
+              codeBlock.examples[i] = parseXMLExample(content);
+            })
+            .catch(function(err) {
+              var error = err;
 
-          var promise = extractor.readFile(exampleFilePath).then(function(content) {
-            var examples = xmlExampleParser(content.toString('utf-8'));
-            codeBlock.examples = codeBlock.examples.concat(examples);
-          });
+              if (err.code == 'ENOENT') {
+                error = new Error(format('Example file "%s" not found in %s (line %s)', tagContent, source.path, record.line));
+              }
+
+              return Promise.reject(error);
+            });
+
           promises.push(promise);
           break;
       }
@@ -82,6 +92,11 @@ module.exports = function extract(source) {
   });
 
   return Promise.all(promises).then(function () {
+    // turn examples array of arrays into flat list
+    source.blocks.forEach(function(block) {
+      block.examples = [].concat.apply([], block.examples);
+    });
+
     return source;
   });
 };
