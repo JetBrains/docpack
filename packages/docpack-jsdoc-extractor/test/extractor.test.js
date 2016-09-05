@@ -131,6 +131,12 @@ describe('Extractor', () => {
           .catch(done);
       });
     });
-  });
 
+    describe('@example-file', () => {
+      it('should properly resolve the file', () => {});
+      it('should parse file properly', () => {});
+      it('should assign examples in right order', () => {});
+      it('should cause recompilation when example file was changed', () => {});
+    });
+  });
 });
