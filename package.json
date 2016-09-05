@@ -1,6 +1,6 @@
 {
   "name": "docpack",
-  "version": "1.0.1-alpha",
+  "version": "1.0.2-alpha",
   "description": "Webpack plugin to extract and generate documentation from your sources",
   "keywords": [
     "webpack",
@@ -33,15 +33,15 @@
     "rimraf": "2.5.2",
     "sinon": "1.17.4",
     "sinon-chai": "2.8.0",
+    "webpack": "^1.12.10",
     "webpack-config-merger": "0.0.5",
     "webpack-dev-server": "1.14.1"
   },
   "dependencies": {
-    "bluebird": "^3.1.1",
+    "bluebird": "^3.4.0",
     "extend": "3.0.0",
-    "loader-utils": "0.2.14",
+    "loader-utils": "^0.2.10",
     "merge-options": "0.0.64",
-    "webpack": "^1.12.10",
-    "webpack-toolkit": "0.1.0"
+    "webpack-toolkit": "^0.1.0"
   }
 }
