@@ -16,12 +16,13 @@ var TAG_START_REGEXP = /(?:<\s*\/\s*file)(?![\s\S]*<\s*\/\s*file)/;
  * @returns {Array<Example>|null}
  */
 module.exports = function (content) {
-  if (content.trim() == '' || content.indexOf('<example') == -1)
+  var hasXMLExamples = content.indexOf('<example') > -1;
+  if (!hasXMLExamples) {
     return [];
+  }
 
-  // Avoid xml parsing issues
-  var wrappedContent = '<root>' + content + '</root>';
   var examples = [];
+  var wrappedContent = '<root>' + content + '</root>';
   var currentExample = null;
   var currentFile = null;
   var fileContentStartPosition = null;
@@ -73,12 +74,8 @@ module.exports = function (content) {
         stopFileParsing();
         return;
       }
-      
+
       var fileContent = wrappedContent.substring(fileContentStartPosition, fileContentEndPosition);
-      if (fileContent.trim() === '') {
-        stopFileParsing();
-        return;
-      } 
 
       currentFile.type =  currentFile.attrs.type || 'js';
       currentFile.content = stripIndent(fileContent);
