@@ -1,6 +1,6 @@
 {
   "name": "docpack",
-  "version": "1.0.2-alpha",
+  "version": "1.0.3-alpha",
   "description": "Webpack plugin to extract and generate documentation from your sources",
   "keywords": [
     "webpack",
