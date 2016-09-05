@@ -1,25 +1,25 @@
 require('chai').should();
 
-var exampleParser = require('../lib/xmlExampleParser');
+var examplesParser = require('../lib/parseXMLExamples');
 var Example = require('docpack/lib/data/Example');
 var ExampleFile = require('docpack/lib/data/ExampleFile');
 
 function parse(input) {
-  return exampleParser(input)[0];
+  return examplesParser(input)[0];
 }
 
 function parseAndGetFirstFile(input) {
-  return exampleParser(input)[0].files[0];
+  return examplesParser(input)[0].files[0];
 }
 
 describe('xmlExampleParser', () => {
 
   it('should return empty array if no examples found', () => {
     var input = ['\n', '\n', '   ', '\n', '  \n'].join('');
-    exampleParser(input).should.be.a('array').and.be.empty;
+    examplesParser(input).should.be.a('array').and.be.empty;
 
     input = 'var a = 123; <file></file>';
-    exampleParser(input).should.be.a('array').and.be.empty;
+    examplesParser(input).should.be.a('array').and.be.empty;
   });
 
   describe('<example>', () => {
