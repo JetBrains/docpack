@@ -4,7 +4,8 @@
   "description": "",
   "main": "lib/plugin.js",
   "scripts": {
-    "test": "mocha test/*.test.js"
+    "test": "mocha test/*.test.js",
+    "coverage": "istanbul cover --report text --report html --report lcov node_modules/mocha/bin/_mocha"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
+    "istanbul": "^0.4.5",
     "mocha": "^3.0.2",
     "webpack": "^1.13.2"
   }
