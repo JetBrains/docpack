@@ -40,7 +40,7 @@ describe('Extractor', () => {
     source = null;
   });
 
-  it('should return null if source content is empty', () => {
+  it('should resolve with null if content is empty', () => {
     source.content = '';
     return extract(source).should.become(null);
   });
@@ -80,7 +80,7 @@ describe('Extractor', () => {
       .catch(done);
   });
 
-  it('should save every tag in block.attrs and support custom tags', (done) => {
+  it('should save every tag in block attributes and support custom tags', (done) => {
     source.content = `
       /**
        * @type {Object} foo

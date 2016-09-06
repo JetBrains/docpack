@@ -21,38 +21,38 @@ module.exports = function extract(source) {
   }
 
   try {
-    var tree = parseComments(content);
+    var comments = parseComments(content);
   } catch (e) {
     var error = new Error(format('Invalid JSDoc in %s\n%s', source.path, e.toString()));
     return Promise.reject(error);
   }
 
   var promises = [];
-  var firstRecord = tree[0];
 
-  // Tags from first comment goes to source attributes
-  if (firstRecord && firstRecord.tags && firstRecord.tags.length > 0) {
-    firstRecord.tags.forEach(function (tag) {
-      source.attrs[tag.type] = tag.string;
-    });
-  }
+  comments.forEach(function (comment, commentIndex) {
+    var isFirstComment = commentIndex == 0;
+    var codeBlock = new CodeBlock({content: comment.code || ''});
+    var tags = comment.tags;
 
-  tree.forEach(function (record, i) {
-    var codeBlock = new CodeBlock({content: record.code || ''});
-    var tags = record.tags;
-
-    if (record.description) {
-      codeBlock.description = record.description.full;
+    if (comment.description) {
+      codeBlock.description = comment.description.full;
     }
 
     // Tags
-    tags && record.tags.forEach(function(tag, i) {
+    tags && comment.tags.forEach(function(tag, i) {
       var tagName = tag.type;
       var tagContent = tag.string;
 
-      codeBlock.attrs[tagName] = tagContent;
-
       switch (tagName) {
+        default:
+          codeBlock.attrs[tagName] = tagContent;
+
+          // Every tag from first comment goes to source attributes
+          if (isFirstComment) {
+            source.attrs[tagName] = tagContent;
+          }
+          break;
+
         case 'description':
           codeBlock.attrs.description = tag.html;
           break;
@@ -68,6 +68,7 @@ module.exports = function extract(source) {
 
         case 'example-file':
           var filepath = path.resolve( path.dirname(source.absolutePath), tagContent );
+
           var promise = extractor.readFile(filepath)
             .then(function (content) {
               extractor.addDependency(filepath);
@@ -77,7 +78,7 @@ module.exports = function extract(source) {
               var error = err;
 
               if (err.code == 'ENOENT') {
-                error = new Error(format('Example file "%s" not found in %s (line %s)', tagContent, source.path, record.line));
+                error = new Error(format('Example file "%s" not found in %s (line %s)', tagContent, source.path, comment.line));
               }
 
               return Promise.reject(error);
