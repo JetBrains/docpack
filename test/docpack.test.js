@@ -108,17 +108,16 @@ describe('Docpack', () => {
 
   describe('apply()', () => {
     it('should apply all plugins registered via `use()`', (done) => {
-      var Plugin = createPlugin('foo', sinon.spy());
-      var plugin = new Plugin();
+      var pluginBody = sinon.spy();
+      var plugin = createPlugin('foo', pluginBody)();
 
-      var compiler = new InMemoryCompiler({
-        plugins: [ Docpack().use(plugin) ]
-      });
-
-      compiler.run().then(compilation => {
-        plugin.apply.should.have.been.calledOne;
-        done();
-      }).catch(done);
+      InMemoryCompiler({plugins: [Docpack().use(plugin)]})
+        .run()
+        .then(compilation => {
+          pluginBody.should.have.been.calledOne;
+          done();
+        })
+        .catch(done);
     });
 
     describe('Hooks', () => {
@@ -186,23 +185,27 @@ describe('Docpack', () => {
           // Handlers attached to generate stage invoked ALWAYS, even if there is no files to process
           generatePlugin.should.have.been.calledOnce;
 
-          // When there is no files to process handlers in generate stage receives null as first param
-          generatePlugin.should.have.been.calledWith(null);
+          // When there is no files to process handlers in generate stage receives [] as first param
+          generatePlugin.should.have.been.calledWith([]);
           done();
         })
         .catch(done);
       });
 
-      it('should throw if invalid type returned from plugin', (done) => {
+      it('should throw if invalid type returned from plugin', () => {
         var docpack = Docpack()
           .use(HOOKS.BEFORE_EXTRACT, (sources, done) => done(null, 'qwe'));
 
-        compiler.apply(docpack).run().then(c => {
-          done(new Error('should throw if invalid type returned from plugin'));
-        }).catch(error => {
-          error.should.be.instanceOf(TypeError);
-          done();
-        })
+        compiler.apply(docpack);
+
+        return compiler.run().should.be.rejectedWith('Plugins should return array');
+      });
+
+      it('should properly handle errors from plugins', () => {
+        var docpack = Docpack()
+          .use(HOOKS.EXTRACT, (sources, done) => done('Bad content'));
+
+        return compiler.apply(docpack).run().should.be.rejectedWith('Bad content');
       });
 
       it('should save results after AFTER_EXTRACT', (done) => {
