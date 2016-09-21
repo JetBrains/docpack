@@ -40,9 +40,9 @@ describe('Extractor', () => {
     source = null;
   });
 
-  it('should resolve with null if content is empty', () => {
+  it('should pass result to next step if content is empty', () => {
     source.content = '';
-    return extract(source).should.become(null);
+    return extract(source).should.become(source);
   });
 
   it('should reject when invalid jsdoc', () => {

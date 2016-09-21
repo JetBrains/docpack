@@ -9,7 +9,7 @@ var parseXMLExample = require('./parseXMLExamples');
 
 /**
  * @param {Source} source
- * @returns {Promise<Source|null>}
+ * @returns {Promise<Source>}
  */
 module.exports = function extract(source) {
   var extractor = this;
@@ -17,7 +17,7 @@ module.exports = function extract(source) {
   var isEmpty = content.trim() == '';
 
   if (isEmpty) {
-    return Promise.resolve(null);
+    return Promise.resolve(source);
   }
 
   try {
