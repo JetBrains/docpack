@@ -72,7 +72,7 @@ module.exports = function extract(source) {
           var promise = extractor.readFile(filepath)
             .then(function (content) {
               extractor.addDependency(filepath);
-              codeBlock.examples[i] = parseXMLExample(content);
+              codeBlock.examples.push(parseXMLExample(content));
             })
             .catch(function(err) {
               var error = err;
