@@ -3,7 +3,7 @@ var sinon = require('sinon');
 var Promise = require('bluebird');
 var shuffleArray = require('shuffle-array');
 
-var InMemoryCompiler = require('../../webpack-toolkit/lib/InMemoryCompiler');
+var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
 var MemoryFS = require('memory-fs');
 
 var Docpack = require('../lib/docpack');
