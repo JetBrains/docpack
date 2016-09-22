@@ -1,4 +1,4 @@
-var DocpackPlugin = require('../lib/docpackPlugin');
+var DocpackPlugin = require('../lib/utils/docpackPlugin');
 var create = DocpackPlugin.create;
 
 describe('Docpack Plugin', () => {

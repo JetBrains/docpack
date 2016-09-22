@@ -7,9 +7,9 @@ var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
 var MemoryFS = require('memory-fs');
 
 var Docpack = require('../lib/docpack');
-var DocpackPlugin = require('../lib/docpackPlugin');
+var DocpackPlugin = require('../lib/utils/docpackPlugin');
 var HOOKS = require('../lib/hooks');
-var createPlugin = require('../lib/docpackPlugin').create;
+var createPlugin = require('../lib/utils/docpackPlugin').create;
 var Source = require('../lib/data/Source');
 
 function noop() {}
