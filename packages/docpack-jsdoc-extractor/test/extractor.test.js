@@ -3,6 +3,7 @@ chai.use(require('chai-as-promised'));
 chai.should();
 
 var path = require('path');
+var resolve = path.resolve;
 var extract = require('../lib/extractor');
 var Source = require('docpack/lib/data/Source');
 var Example = require('docpack/lib/data/Example');
@@ -200,7 +201,7 @@ describe('Extractor', () => {
         it('should resolve file properly', () => {
           var promises = [];
 
-          writeFile('/examples.html');
+          writeFile(resolve('/examples.html'));
 
           source.content = '/** @example-file examples.html */';
           promises.push(mocked(source).should.be.fulfilled);
@@ -221,7 +222,7 @@ describe('Extractor', () => {
             content: '/** @example-file ../dir2/examples.html */'
           });
 
-          writeFile('/dir2/examples.html');
+          writeFile(resolve('/dir2/examples.html'));
 
           return mocked(source).should.be.fulfilled;
         });
@@ -229,7 +230,7 @@ describe('Extractor', () => {
 
       it('should parse file properly', (done) => {
         source.content = '/** @example-file examples.html */';
-        writeFile('/examples.html', '<example><file></file></example>');
+        writeFile(resolve('/examples.html'), '<example><file></file></example>');
 
         mocked(source).then(source => {
           var example = source.blocks[0].examples[0];
@@ -258,7 +259,7 @@ describe('Extractor', () => {
         source.content = input;
 
         expectedOrder.forEach((filename) => {
-          writeFile(`/${filename}`, `<example name="${filename}"></example>`);
+          writeFile(resolve(`/${filename}`), `<example name="${filename}"></example>`);
         });
 
         mocked(source)
