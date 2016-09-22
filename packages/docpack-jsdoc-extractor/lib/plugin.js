@@ -1,34 +1,22 @@
 var docpack = require('docpack');
+var createContext = require('docpack/lib/utils/createExtractorContext');
 var extractor = require('./extractor');
+var findModule = require('webpack-toolkit').getModuleByFilepath;
 var Promise = require('bluebird');
-var _readFile = require('webpack-toolkit/lib/readFile');
 
 module.exports = docpack.createPlugin('jsdoc-extractor', function(compiler) {
   compiler.plugin('compilation', function(compilation) {
     compilation.plugin(docpack.HOOKS.EXTRACT, function(sources, done) {
-      var promises = Promise.map(sources, function(source) {
 
-        var context = {
-          fs: compilation.compiler.inputFileSystem,
-          compilation: compilation,
-          module: compilation.modules.filter(function (module) {
-            return module.resource == source.absolutePath
-          })[0],
-          addDependency: function (filepath) {
-            this.module.fileDependencies.push(filepath);
-          },
-          readFile: function (filepath) {
-            return _readFile(this.fs, filepath);
-          }
-        };
-
+      var promises = Promise.map(sources, function (source) {
+        var module = findModule(compilation, source.absolutePath);
+        var context = createContext(compiler.inputFileSystem, module);
         return extractor.call(context, source);
       });
 
-      Promise.all(promises).then(function(s) {
-        done(null, s);
+      Promise.all(promises).then(function(sources) {
+        done(null, sources);
       });
-
     });
   });
 });
