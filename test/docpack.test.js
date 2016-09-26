@@ -148,7 +148,8 @@ describe('Docpack', () => {
           HOOKS.AFTER_EXTRACT,
           HOOKS.BEFORE_GENERATE,
           HOOKS.GENERATE,
-          HOOKS.AFTER_GENERATE
+          HOOKS.AFTER_GENERATE,
+          HOOKS.EMIT
         ];
         var actualOrder = [];
 
