@@ -1,6 +1,5 @@
 var path = require('path');
 var sinon = require('sinon');
-var Promise = require('bluebird');
 var shuffleArray = require('shuffle-array');
 
 var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
@@ -65,10 +64,10 @@ describe('Docpack', () => {
       (function() { docpack.use( noop ) }).should.throws(TypeError);
       (function() { docpack.use( noop() ) }).should.throws(TypeError);
       (function() { docpack.use( function(){ return function() {} }() ) }).should.throws(TypeError);
-      (function() { docpack.use( createPlugin('foo')() ) }).should.not.throws();
+      (function() { docpack.use( createPlugin()() ) }).should.not.throws();
     });
 
-    it('should allow simple way of plugin creation (hook:String, handler:Function)', () => {
+    it('should allow to inject in any hook (actually simple plugin creation) (hook:String, handler:Function)', () => {
       var docpack = Docpack();
       (function() { docpack.use(1, function(){}) }).should.throws(TypeError);
       (function() { docpack.use(function(){}, function(){}) }).should.throws(TypeError);
@@ -77,14 +76,14 @@ describe('Docpack', () => {
     });
 
     it('should return docpack instance', () => {
-      var Plugin = createPlugin('foo');
+      var Plugin = createPlugin();
       Docpack().use(Plugin()).should.be.instanceOf(Docpack);
     });
 
-    it('should save plugins in `plugins` field', () => {
+    it('should save plugins in `plugins` prop', () => {
       var docpack = Docpack();
-      var Plugin1 = createPlugin('foo');
-      var Plugin2 = createPlugin('bar');
+      var Plugin1 = createPlugin();
+      var Plugin2 = createPlugin();
 
       docpack.use(Plugin1()).use(Plugin2());
       docpack.plugins.should.be.lengthOf(2);
@@ -109,7 +108,7 @@ describe('Docpack', () => {
   describe('apply()', () => {
     it('should apply all plugins registered via `use()`', (done) => {
       var pluginBody = sinon.spy();
-      var plugin = createPlugin('foo', pluginBody)();
+      var plugin = createPlugin(pluginBody)();
 
       InMemoryCompiler({plugins: [Docpack().use(plugin)]})
         .run()
@@ -155,7 +154,12 @@ describe('Docpack', () => {
 
         shuffleArray(expectedOrder, {copy: true})
           .map((hookName) => {
-            var Plugin = createPlugin(`plugin${hookName}`, plugInHook(hookName, (sources, done) => {
+            //var Plugin = createPlugin(`plugin${hookName}`, plugInHook(hookName, (sources, done) => {
+            //  actualOrder.push(hookName);
+            //  done(null, sources);
+            //}));
+
+            var Plugin = createPlugin(plugInHook(hookName, (sources, done) => {
               actualOrder.push(hookName);
               done(null, sources);
             }));
