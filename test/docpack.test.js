@@ -154,11 +154,6 @@ describe('Docpack', () => {
 
         shuffleArray(expectedOrder, {copy: true})
           .map((hookName) => {
-            //var Plugin = createPlugin(`plugin${hookName}`, plugInHook(hookName, (sources, done) => {
-            //  actualOrder.push(hookName);
-            //  done(null, sources);
-            //}));
-
             var Plugin = createPlugin(plugInHook(hookName, (sources, done) => {
               actualOrder.push(hookName);
               done(null, sources);
