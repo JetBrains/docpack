@@ -4,7 +4,7 @@
   "description": "",
   "main": "lib/plugin.js",
   "scripts": {
-    "test": "mocha test/*.test.js",
+    "test": "mocha test/*.test.js test/**/*.test.js",
     "coverage": "istanbul cover --report text --report html --report lcov node_modules/mocha/bin/_mocha"
   },
   "repository": {
@@ -17,9 +17,13 @@
     "url": "https://github.com/kisenka/docpack-jsdoc-extractor/issues"
   },
   "homepage": "https://github.com/kisenka/docpack-jsdoc-extractor#readme",
+  "files": [
+    "lib/",
+    "README.md"
+  ],
   "dependencies": {
     "bluebird": "^3.4.6",
-    "docpack": "^1.5.1-alpha",
+    "docpack": "^1.6.1-alpha",
     "dox": "^0.9.0",
     "sax": "^1.2.1",
     "strip-indent": "^1.0.1"
