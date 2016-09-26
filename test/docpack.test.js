@@ -152,21 +152,21 @@ describe('Docpack', () => {
         ];
         var actualOrder = [];
 
-        shuffleArray(expectedOrder, {copy: true})
-          .map((hookName) => {
-            var Plugin = createPlugin(plugInHook(hookName, (sources, done) => {
-              actualOrder.push(hookName);
-              done(null, sources);
-            }));
+        shuffleArray(expectedOrder, {copy: true}).map((hookName) => {
+          var Plugin = createPlugin(plugInHook(hookName, (sources, done) => {
+            actualOrder.push(hookName);
+            done(null, sources);
+          }));
 
-            docpack.use(Plugin());
-          });
+          docpack.use(Plugin());
+        });
 
-        compiler.apply(docpack).run().then(c => {
-          actualOrder.should.be.eql(expectedOrder);
-          done();
-        })
-        .catch(done)
+        compiler.apply(docpack).run()
+          .then(c => {
+            actualOrder.should.be.eql(expectedOrder);
+            done();
+          })
+          .catch(done)
       });
 
       it('should invoke handlers properly', (done) => {
