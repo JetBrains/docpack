@@ -4,6 +4,7 @@ var Page = require('docpack/lib/data/Page');
 var utils = require('webpack-toolkit');
 var slug = require('url-slug');
 var Promise = require('bluebird');
+var format = require('util').format;
 
 var defaultConfig = {
   template: null,
@@ -13,10 +14,16 @@ var defaultConfig = {
 
 var PageGeneratorPlugin = docpack.createPlugin({
   name: 'page-generator',
-  defaultConfig: defaultConfig
+  defaultConfig: defaultConfig,
+  init: function(config) {
+    if (!config || !config.template) {
+      throw new Error('Template should be provided');
+    }
+  }
 });
 
 module.exports = PageGeneratorPlugin;
+module.exports.defaultConfig = defaultConfig;
 
 /**
  * @param {Compilation} compilation
@@ -38,7 +45,13 @@ PageGeneratorPlugin.prototype._getTemplateAssetFilename = function(compilation) 
  * @private
  */
 PageGeneratorPlugin.prototype._isShouldAddFallbackLoader = function(compiler) {
-  var template = this.template;
+  var template = this.config.template;
+  var ext = path.extname(template);
+
+  if (ext == '.js') {
+    return false;
+  }
+
   var moduleOptions = compiler.options.module;
 
   var loaders = [].concat(
@@ -109,13 +122,29 @@ PageGeneratorPlugin.prototype.apply = function (compiler) {
         .then(function(sources) {
           var isShouldRecompile = plugin._isShouldRecompileTemplate(compilation);
 
-          if (isShouldRecompile) {
-            return utils.compileVMScript(templateSource)
-              .then(function(factory) { plugin.render = factory; })
-              .then(function() { return sources; });
+          if (!isShouldRecompile) {
+            return sources;
           }
 
-          return sources;
+          return utils.compileVMScript(templateSource)
+            .then(function (result) {
+              var resultType = typeof result;
+
+              if (resultType != 'function') {
+                var msg = format(
+                  '%s should return a function after being processed by loader, but currently %s is returned',
+                  template,
+                  resultType
+                );
+                return Promise.reject(new Error(msg));
+              }
+
+              return result;
+            })
+            .then(function (result) {
+              plugin.render = result;
+              return sources;
+            });
         })
         .then(function(sources) {
           plugin.generate(compilation, sources);
@@ -134,13 +163,24 @@ PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
   var context = compilation.compiler.context;
 
   sources.forEach(function(source) {
+    var content = plugin.render({source: source});
+
+    if (typeof content != 'string' || content instanceof Buffer) {
+      var msg = format(
+        '%s template function should return string or buffer, but currently %s is returned',
+        plugin.config.template,
+        typeof content
+      );
+      throw new Error(msg);
+    }
+
     var url = utils.interpolateName(plugin.config.filename, {
       path: source.absolutePath,
       context: context
     });
-    var content = plugin.render({source: source});
 
     source.page = new Page({url: url, content: content});
+
     utils.emitAsset(compilation, url, content);
   });
 };
