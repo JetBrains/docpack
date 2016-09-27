@@ -1,25 +1,26 @@
 var path = require('path');
 var sinon = require('sinon');
 var shuffleArray = require('shuffle-array');
-
 var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
 var MemoryFS = require('memory-fs');
 
 var Docpack = require('../lib/docpack');
-var HOOKS = require('../lib/hooks');
+var HOOKS = Docpack.HOOKS;
 var DocpackPlugin = require('../lib/utils/DocpackPlugin');
 var createPlugin = DocpackPlugin.create;
 var Source = require('../lib/data/Source');
 
-function noop() {}
+var processingHooks = [
+  HOOKS.BEFORE_EXTRACT,
+  HOOKS.EXTRACT,
+  HOOKS.AFTER_EXTRACT,
+  HOOKS.BEFORE_GENERATE,
+  HOOKS.GENERATE,
+  HOOKS.AFTER_GENERATE,
+  HOOKS.EMIT
+];
 
-function plugInHook(hook, handler) {
-  return function(compiler) {
-    compiler.plugin('compilation', function (compilation) {
-      compilation.plugin(hook, handler);
-    });
-  }
-}
+function noop() {}
 
 function createSpiedPluginBody() {
   return sinon.spy((sources, done) => done(null, sources));
@@ -49,7 +50,6 @@ describe('Docpack', () => {
       var docpack = Docpack();
       docpack.should.have.property('config').and.be.eql(Docpack.defaultConfig);
       docpack.should.have.property('plugins').and.be.empty;
-      docpack.should.have.property('sources').and.be.empty;
     });
 
     it('should assign passed config', () => {
@@ -126,25 +126,36 @@ describe('Docpack', () => {
         fs = compiler = null;
       });
 
-      it('should invoke all handlers in proper order', (done) => {
-        var docpack = Docpack();
+      it('should throw if invalid type returned from plugin', () => {
+        var docpack = Docpack()
+          .use(HOOKS.BEFORE_EXTRACT, (sources, done) => done(null, 'qwe'));
 
-        var expectedOrder = [
-          HOOKS.BEFORE_EXTRACT,
-          HOOKS.EXTRACT,
-          HOOKS.AFTER_EXTRACT,
-          HOOKS.BEFORE_GENERATE,
-          HOOKS.GENERATE,
-          HOOKS.AFTER_GENERATE,
-          HOOKS.EMIT
-        ];
+        compiler.apply(docpack);
+
+        return compiler.run().should.be.rejectedWith(TypeError);
+      });
+
+      it('should properly handle errors from plugins', () => {
+        var docpack = Docpack()
+          .use(HOOKS.EXTRACT, (sources, done) => done('Bad content'));
+
+        return compiler.apply(docpack).run().should.be.rejectedWith('Bad content');
+      });
+
+      it('should invoke plugins in proper order', (done) => {
+        var docpack = Docpack();
+        var expectedOrder = processingHooks;
         var actualOrder = [];
 
         shuffleArray(expectedOrder, {copy: true}).map((hookName) => {
-          var Plugin = createPlugin(plugInHook(hookName, (sources, done) => {
-            actualOrder.push(hookName);
-            done(null, sources);
-          }));
+          var Plugin = createPlugin(function(compiler) {
+            compiler.plugin('compilation', function(compilation) {
+              compilation.plugin(hookName, function(sources, done) {
+                actualOrder.push(hookName);
+                done(null, sources);
+              });
+            });
+          });
 
           docpack.use(Plugin());
         });
@@ -157,44 +168,28 @@ describe('Docpack', () => {
           .catch(done)
       });
 
-      it('should invoke handlers properly', (done) => {
-        var extractPlugin = createSpiedPluginBody();
-        var generatePlugin = createSpiedPluginBody();
+      it('should INVOKE plugins even if no matched sources found', (done) => {
+        var docpack = Docpack(/\.foo$/);
 
-        var docpack = Docpack(/\.txt$/)
-          .use(HOOKS.BEFORE_EXTRACT, extractPlugin)
-          .use(HOOKS.BEFORE_GENERATE, generatePlugin);
+        var dummyPluginsByHooks = processingHooks.map(hookName => {
+          return {
+            hook: hookName,
+            body: createSpiedPluginBody()
+          }
+        });
+
+        dummyPluginsByHooks.forEach(plugin => {
+          docpack.use(plugin.hook, plugin.body)
+        });
 
         compiler.apply(docpack).run().then(c => {
-          // Handlers attached to extract stage are not invoked if there is no files to process
-          extractPlugin.should.have.not.been.called;
-
-          // Handlers attached to generate stage invoked ALWAYS, even if there is no files to process
-          generatePlugin.should.have.been.calledOnce;
-
-          // When there is no files to process handlers in generate stage receives [] as first param
-          generatePlugin.should.have.been.calledWith([]);
+          dummyPluginsByHooks.forEach(plugin => {
+            plugin.body.should.have.been.called;
+          });
           done();
         })
         .catch(done);
       });
-
-      it('should throw if invalid type returned from plugin', () => {
-        var docpack = Docpack()
-          .use(HOOKS.BEFORE_EXTRACT, (sources, done) => done(null, 'qwe'));
-
-        compiler.apply(docpack);
-
-        return compiler.run().should.be.rejectedWith('Plugins should return array');
-      });
-
-      it('should properly handle errors from plugins', () => {
-        var docpack = Docpack()
-          .use(HOOKS.EXTRACT, (sources, done) => done('Bad content'));
-
-        return compiler.apply(docpack).run().should.be.rejectedWith('Bad content');
-      });
-
     });
   });
 });
