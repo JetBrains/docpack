@@ -20,8 +20,6 @@ var processingHooks = [
   HOOKS.EMIT
 ];
 
-function noop() {}
-
 function createSpiedPluginBody() {
   return sinon.spy((sources, done) => done(null, sources));
 }
@@ -61,8 +59,8 @@ describe('Docpack', () => {
   describe('use()', () => {
     it('should throws when wrong plugin type', () => {
       var docpack = Docpack();
-      (function() { docpack.use( noop ) }).should.throws(TypeError);
-      (function() { docpack.use( noop() ) }).should.throws(TypeError);
+      (function() { docpack.use( function(){} ) }).should.throws(TypeError);
+      (function() { docpack.use( (function(){})() ) }).should.throws(TypeError);
       (function() { docpack.use( function(){ return function() {} }() ) }).should.throws(TypeError);
       (function() { docpack.use( createPlugin()() ) }).should.not.throws();
     });
