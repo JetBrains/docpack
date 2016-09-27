@@ -92,19 +92,6 @@ describe('Docpack', () => {
     });
   });
 
-  describe('save()', function () {
-    it('should save source', function () {
-      var source = new Source({path: '/qwe', absolutePath: '/qwe', content: 'qwe'});
-      var docpack = Docpack();
-
-      docpack.save(source);
-      docpack.sources.should.include(source).and.to.have.lengthOf(1);
-
-      docpack.save(source);
-      docpack.sources.should.include(source).and.to.have.lengthOf(1);
-    })
-  });
-
   describe('apply()', () => {
     it('should apply all plugins registered via `use()`', (done) => {
       var pluginBody = sinon.spy();
@@ -208,23 +195,6 @@ describe('Docpack', () => {
         return compiler.apply(docpack).run().should.be.rejectedWith('Bad content');
       });
 
-      it('should save results after AFTER_EXTRACT', (done) => {
-        var s;
-        var docpack = Docpack();
-        docpack.sources.should.be.lengthOf(0);
-
-        docpack.use(HOOKS.AFTER_EXTRACT, (sources, done) => {
-          s = sources;
-          done(null, sources);
-        });
-
-        compiler.apply(docpack).run().then(c => {
-          docpack.sources.should.be.lengthOf(1).and.be.eql(s);
-          done();
-        }).catch(done);
-
-
-      });
     });
   });
 });
