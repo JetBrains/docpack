@@ -62,6 +62,8 @@ describe('Docpack', () => {
       (function() { docpack.use( function(){} ) }).should.throws(TypeError);
       (function() { docpack.use( (function(){})() ) }).should.throws(TypeError);
       (function() { docpack.use( function(){ return function() {} }() ) }).should.throws(TypeError);
+      (function() { docpack.use( createPlugin() ) }).should.throws();
+
       (function() { docpack.use( createPlugin()() ) }).should.not.throws();
     });
 
