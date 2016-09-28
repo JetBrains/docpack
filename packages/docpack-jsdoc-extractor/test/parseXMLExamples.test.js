@@ -1,5 +1,3 @@
-require('chai').should();
-
 var examplesParser = require('../lib/parseXMLExamples');
 var Example = require('docpack/lib/data/Example');
 var ExampleFile = require('docpack/lib/data/ExampleFile');

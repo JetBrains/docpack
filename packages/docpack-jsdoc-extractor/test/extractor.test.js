@@ -1,7 +1,3 @@
-var chai = require('chai');
-chai.use(require('chai-as-promised'));
-chai.should();
-
 var path = require('path');
 var resolve = path.resolve;
 var extract = require('../lib/extractor');
