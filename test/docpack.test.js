@@ -92,6 +92,19 @@ describe('Docpack', () => {
     });
   });
 
+  describe('save()', () => {
+    it('should save source', () => {
+      var source = new Source({path: '/qwe', absolutePath: '/qwe', content: 'qwe'});
+      var docpack = Docpack();
+
+      docpack.save(source);
+      docpack.sources.should.include(source).and.to.have.lengthOf(1);
+
+      docpack.save(source);
+      docpack.sources.should.include(source).and.to.have.lengthOf(1);
+    });
+  });
+
   describe('apply()', () => {
     it('should apply all plugins registered via `use()`', (done) => {
       var pluginBody = sinon.spy();
