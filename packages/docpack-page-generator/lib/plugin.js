@@ -1,23 +1,62 @@
 var path = require('path');
-var docpack = require('docpack');
+var Docpack = require('docpack');
 var Page = require('docpack/lib/data/Page');
-var utils = require('webpack-toolkit');
 var slug = require('url-slug');
-var Promise = require('bluebird');
-var format = require('util').format;
+var utils = require('webpack-toolkit');
+var isPlainObject = require('is-plain-object');
+var ChildCompiler = utils.ChildCompiler;
+var merge = require('merge-options');
+
+
+/**
+match
+template
+filename: String|Function
+context: Object|Function
+
+- match: надо чтобы принимал функцию, чтобы отфильтровать сорцы без примеров например???
+
+- targets: позволяет выбрать другие объекты для которых нужно сгенерить страницы
+
+- template: String
+
+- filename: String|Function
+
+- context: Object|Function
+
+- recompileOnTemplateChange: Boolean (false by default)
+
+- loader. Если у тебя уже есть твиг, но на клиентские шаблоны. По умолчанию, если найден лоадер,
+ фоллбечный добавляться не будет. Но этой опцией можно перекрыть.
+*/
+
 
 var defaultConfig = {
+  match: null,
   template: null,
-  filename: '[path][name].[ext]-docs.html',
-  context: {}
+  filename: '[path][name].[ext].html',
+  context: {},
+  recompileOnTemplateChange: false,
+  loader: null
 };
 
-var PageGeneratorPlugin = docpack.createPlugin({
+var CONST = {
+  TEMPLATE_ASSET_NAME: 'docpack-page-generator-template',
+  FALLBACK_LOADER_NAME: 'twig-loader',
+  URL_ATTR_NAME: 'url'
+};
+
+/**
+ * @constructor
+ */
+var PageGeneratorPlugin = Docpack.createPlugin({
   name: 'page-generator',
   defaultConfig: defaultConfig,
-  init: function(config) {
-    if (!config || !config.template) {
-      throw new Error('Template should be provided');
+  init: function() {
+    var config = this.config;
+
+    if (!config.template) {
+      throw new Error('`template` is required');
     }
   }
 });
@@ -26,160 +65,178 @@ module.exports = PageGeneratorPlugin;
 module.exports.defaultConfig = defaultConfig;
 
 /**
- * @param {Compilation} compilation
- * @returns {String|null}
- * @private
+ * @static
+ * @param {String} template
+ * @returns {String}
  */
-PageGeneratorPlugin.prototype._getTemplateAssetFilename = function(compilation) {
-  var template = this.config.template;
-  var templateEntry = compilation.entries.filter(function (entry) {
-    return entry.rawRequest === template;
-  })[0];
-
-  return templateEntry ? templateEntry.chunks[0].files[0] : null;
+PageGeneratorPlugin.getCompilerNameFor = function(template) {
+  return 'docpack-page-generator__' + slug(template);
 };
 
 /**
- * @param {Compiler} compiler
- * @returns {Boolean}
- * @private
+ * @type {String}
  */
-PageGeneratorPlugin.prototype._isShouldAddFallbackLoader = function(compiler) {
-  var template = this.config.template;
-  var ext = path.extname(template);
+PageGeneratorPlugin.prototype.hash = null;
 
-  if (ext == '.js') {
-    return false;
+/**
+ * @type {Function}
+ */
+PageGeneratorPlugin.prototype.render = null;
+
+/**
+ * @param {Compiler} compiler
+ */
+PageGeneratorPlugin.prototype.configure = function(compiler) {
+  var config = this.config;
+  var tpl = config.template;
+  var ext = path.extname(tpl);
+
+  var resolveExtensions = compiler.options.resolve.extensions;
+  var moduleOptions = compiler.options.module;
+  var hasLoadersToProcessTemplate = resolveExtensions.indexOf(ext) >= 0 || utils.getMatchedLoaders(moduleOptions, tpl).length > 0;
+
+  if (!Array.isArray(moduleOptions.loaders)) {
+    moduleOptions.loaders = [];
   }
 
-  var moduleOptions = compiler.options.module;
+  // If loader specified explicitly, add them to config
+  if (config.loader) {
+    moduleOptions.loaders.push(config.loader);
+  }
+  else if (!hasLoadersToProcessTemplate) {
+    // If no loaders to process the template - add fallback loader to config
+    var fallbackLoaderPath;
 
-  var loaders = [].concat(
-    moduleOptions.preLoaders  || [],
-    moduleOptions.loaders     || [],
-    moduleOptions.postLoaders || []
-  );
-
-  var loadersToProcessTemplate = loaders.filter(function (loaderCfg) {
-    return utils.matcher(loaderCfg, template);
-  });
-
-  return loadersToProcessTemplate.length == 0;
-};
-
-/**
- * @param {Compilation} compilation
- * @returns {Boolean}
- * @private
- */
-PageGeneratorPlugin.prototype._isShouldRecompileTemplate = function(compilation) {
-  var affected = utils.getAffectedFiles(compilation);
-  return affected.indexOf(this.templateAbsolutePath) >= 0;
-};
-
-/**
- * @param {Compiler} compiler
- * @private
- */
-PageGeneratorPlugin.prototype._configureCompiler = function(compiler) {
-  var template = this.config.template;
-
-  // Add entry point
-  utils.addEntry(compiler, template, this.entryName);
-
-  // Add fallback loader
-  if (this._isShouldAddFallbackLoader(compiler)) {
-    var moduleOptions = compiler.options.module;
-
-    if (!Array.isArray(moduleOptions.loaders)) {
-      moduleOptions.loaders = [];
+    try {
+       fallbackLoaderPath = require.resolve(CONST.FALLBACK_LOADER_NAME);
+    } catch (e) {
+      throw new Error('Fallback loader not found');
     }
 
     moduleOptions.loaders.push({
-      test: new RegExp('\.' + path.extname(template).substr(1) + '$'),
-      loader: require.resolve('twig-loader')
+      test: new RegExp('\.' + path.extname(tpl).substr(1) + '$'),
+      loader: fallbackLoaderPath
     });
   }
 };
 
-PageGeneratorPlugin.prototype.apply = function (compiler) {
+PageGeneratorPlugin.prototype.apply = function(compiler) {
   var plugin = this;
   var template = this.config.template;
+  var compilerName = PageGeneratorPlugin.getCompilerNameFor(template);
+  var assetFilename = CONST.TEMPLATE_ASSET_NAME;
 
-  plugin.templateAbsolutePath = path.resolve(compiler.context, template);
-  plugin.entryName = '__docpack-page-generator-template__' + slug(template);
+  compiler.plugin('compilation', function(compilation) {
+    compilation.plugin(Docpack.HOOKS.BEFORE_EXTRACT, function(sources, done) {
+      if (plugin.render) {
+        done(null, sources);
+        return;
+      }
 
-  compiler.plugin(docpack.HOOKS.INIT, plugin._configureCompiler.bind(plugin, compiler));
+      var templateCompiler = new ChildCompiler(compilation, {
+        name: compilerName,
+        output: {
+          filename: assetFilename
+        }
+      });
 
-  compiler.plugin('compilation', function (compilation) {
+      templateCompiler.addEntry(template, assetFilename);
 
-    compilation.plugin(docpack.HOOKS.GENERATE, function (sources, done) {
-      var templateAssetFilename = plugin._getTemplateAssetFilename(compilation);
-      var templateSource = compilation.assets[templateAssetFilename].source();
-      delete compilation.assets[templateAssetFilename];
+      templateCompiler.run()
+        .then(function (compilation) {
+          var hash = compilation.chunks[0].hash;
+          var source = compilation.assets[assetFilename].source();
+          var isShouldToRecompile = plugin.hash !== hash;
 
-      Promise.resolve(sources)
-        .then(function(sources) {
-          var isShouldRecompile = plugin._isShouldRecompileTemplate(compilation);
+          delete compilation.assets[assetFilename];
+          delete compilation.compiler.parentCompilation.assets[assetFilename];
 
-          if (!isShouldRecompile) {
-            return sources;
+          if (!isShouldToRecompile) {
+            done(null, sources);
+            return null;
           }
 
-          return utils.compileVMScript(templateSource)
-            .then(function (result) {
-              var resultType = typeof result;
+          plugin.hash = hash;
 
-              if (resultType != 'function') {
-                var msg = format(
-                  '%s should return a function after being processed by loader, but currently %s is returned',
-                  template,
-                  resultType
-                );
-                return Promise.reject(new Error(msg));
-              }
-
-              return result;
-            })
-            .then(function (result) {
-              plugin.render = result;
-              return sources;
+          return utils.compileVMScript(source)
+            .then(function (render) {
+              var docpack = compiler.options.plugins.filter(function(plugin) {
+                return plugin instanceof Docpack
+              })[0];
+              plugin.render = render;
+              done(null, sources.length == 0 ? docpack.sources : sources);
             });
         })
-        .then(function(sources) {
-          plugin.generate(compilation, sources);
-          done(null, sources);
-        });
+    });
+
+    compilation.plugin(Docpack.HOOKS.GENERATE, function (sources, done) {
+      plugin.generate(compilation, sources);
+      done(null, sources);
     });
   });
 };
 
-/**
- * @param {Compilation} compilation
- * @param {Array<Source>} sources
- */
 PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
   var plugin = this;
-  var context = compilation.compiler.context;
+  var config = plugin.config;
+  var compilerContext = compilation.compiler.context;
+  var targets = sources;
+  var filenameIsFunc = typeof config.filename == 'function';
+  var contextIsFunc = typeof config.context == 'function';
 
-  sources.forEach(function(source) {
-    var content = plugin.render({source: source});
+  // Fetch targets
+  if (config.match) {
+    if (typeof config.match == 'function') {
+      targets = config.match.call(compilation, sources);
+    } else {
+      targets = sources.filter(function(source) {
+        return utils.matcher(config.match, source.absolutePath);
+      });
+    }
+  }
 
-    if (typeof content != 'string' || content instanceof Buffer) {
-      var msg = format(
-        '%s template function should return string or buffer, but currently %s is returned',
-        plugin.config.template,
-        typeof content
-      );
-      throw new Error(msg);
+  // Filename & generate content
+  targets.forEach(function(target) {
+    // Filename
+    var filename;
+    if ('attrs' in target && CONST.URL_ATTR_NAME in target.attrs) {
+      // From attribute
+      filename = target.attrs[CONST.URL_ATTR_NAME];
+
+    } else if (filenameIsFunc) {
+      // Returned from function
+      filename = config.filename(target);
+
+    } else {
+      // String
+      filename = config.filename;
     }
 
-    var url = utils.interpolateName(plugin.config.filename, {
-      path: source.absolutePath,
+    // Generate page url
+    var url = utils.interpolateName(filename, {
+      path: target.absolutePath,
       context: context
     });
 
-    source.page = new Page({url: url, content: content});
+    // Template context
+    var defaultContext = {
+      publicPath: compilation.outputOptions.publicPath || '/',
+      sources: targets,
+      source: target
+    };
+
+    var context = contextIsFunc
+      ? merge(defaultContext, config.context.call(compilation, targets))
+      : merge(defaultContext, config.context);
+
+    var content = plugin.render(context);
+
+    target.page = new Page({url: url, content: content});
+
+    if (url in compilation.assets) {
+      var msg = url + ' page already exist in assets. Check `filename` option (and maybe make it more specific).';
+      compilation.errors.push(msg);
+    }
 
     utils.emitAsset(compilation, url, content);
   });
