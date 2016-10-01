@@ -1,35 +1,10 @@
 var path = require('path');
 var Docpack = require('docpack');
+var merge = require('merge-options');
+var utils = require('webpack-toolkit');
 var Page = require('docpack/lib/data/Page');
 var slug = require('url-slug');
-var utils = require('webpack-toolkit');
-var isPlainObject = require('is-plain-object');
 var ChildCompiler = utils.ChildCompiler;
-var merge = require('merge-options');
-
-
-/**
-match
-template
-filename: String|Function
-context: Object|Function
-
-- match: надо чтобы принимал функцию, чтобы отфильтровать сорцы без примеров например???
-
-- targets: позволяет выбрать другие объекты для которых нужно сгенерить страницы
-
-- template: String
-
-- filename: String|Function
-
-- context: Object|Function
-
-- recompileOnTemplateChange: Boolean (false by default)
-
-- loader. Если у тебя уже есть твиг, но на клиентские шаблоны. По умолчанию, если найден лоадер,
- фоллбечный добавляться не будет. Но этой опцией можно перекрыть.
-*/
-
 
 var defaultConfig = {
   match: null,
@@ -72,11 +47,6 @@ module.exports.defaultConfig = defaultConfig;
 PageGeneratorPlugin.getCompilerNameFor = function(template) {
   return 'docpack-page-generator__' + slug(template);
 };
-
-/**
- * @type {String}
- */
-PageGeneratorPlugin.prototype.hash = null;
 
 /**
  * @type {Function}
@@ -144,27 +114,15 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
 
       templateCompiler.run()
         .then(function (compilation) {
-          var hash = compilation.chunks[0].hash;
           var source = compilation.assets[assetFilename].source();
-          var isShouldToRecompile = plugin.hash !== hash;
 
           delete compilation.assets[assetFilename];
           delete compilation.compiler.parentCompilation.assets[assetFilename];
 
-          if (!isShouldToRecompile) {
-            done(null, sources);
-            return null;
-          }
-
-          plugin.hash = hash;
-
           return utils.compileVMScript(source)
             .then(function (render) {
-              var docpack = compiler.options.plugins.filter(function(plugin) {
-                return plugin instanceof Docpack
-              })[0];
               plugin.render = render;
-              done(null, sources.length == 0 ? docpack.sources : sources);
+              done(null, sources);
             });
         })
     });
@@ -176,60 +134,95 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
   });
 };
 
-PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
-  var plugin = this;
-  var config = plugin.config;
-  var compilerContext = compilation.compiler.context;
+/**
+ * @param {Compilation} compilation
+ * @param {Array<Source>} sources
+ * @returns {Array<Source>}
+ * @private
+ */
+PageGeneratorPlugin.prototype._selectTargets = function(compilation, sources) {
+  var config = this.config;
   var targets = sources;
-  var filenameIsFunc = typeof config.filename == 'function';
-  var contextIsFunc = typeof config.context == 'function';
 
-  // Fetch targets
   if (config.match) {
     if (typeof config.match == 'function') {
       targets = config.match.call(compilation, sources);
     } else {
-      targets = sources.filter(function(source) {
+      targets = sources.filter(function (source) {
         return utils.matcher(config.match, source.absolutePath);
       });
     }
   }
 
+  return targets;
+};
+
+/**
+ * @param {Compilation} compilation
+ * @param {Source} target
+ * @returns {String}
+ * @private
+ */
+PageGeneratorPlugin.prototype._generateURLForTarget = function(compilation, target) {
+  var config = this.config;
+  var filename;
+  var typeofFilename = typeof config.filename;
+
+  if (typeofFilename == 'string') {
+    filename = config.filename;
+
+  } else if (typeofFilename == 'function') {
+    filename = config.filename.call(compilation, target);
+
+  } else if ('attrs' in target && CONST.URL_ATTR_NAME in target.attrs) {
+    filename = target.attrs[CONST.URL_ATTR_NAME];
+  } else {
+    throw new Error('`filename` option can be string or function');
+  }
+
+  return utils.interpolateName(filename, {
+    path: target.absolutePath,
+    context: compilation.compiler.context,
+    content: target.content
+  });
+};
+
+/**
+ * @param {Compilation} compilation
+ * @param {Array<Source>} targets
+ * @param {Source} target
+ * @returns {String}
+ * @private
+ */
+PageGeneratorPlugin.prototype._render = function(compilation, targets, target) {
+  var config = this.config;
+
+  var defaultContext = {
+    publicPath: compilation.outputOptions.publicPath || '/',
+    sources: targets,
+    source: target
+  };
+
+  var context = typeof config.context == 'function'
+    ? merge(defaultContext, config.context.call(compilation, targets))
+    : merge(defaultContext, config.context);
+
+  return this.render(context);
+};
+
+/**
+ * @param {Compilation} compilation
+ * @param {Array<Source>} sources
+ */
+PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
+  var plugin = this;
+  var config = plugin.config;
+  var targets = this._selectTargets(compilation, sources);
+
   // Filename & generate content
   targets.forEach(function(target) {
-    // Filename
-    var filename;
-    if ('attrs' in target && CONST.URL_ATTR_NAME in target.attrs) {
-      // From attribute
-      filename = target.attrs[CONST.URL_ATTR_NAME];
-
-    } else if (filenameIsFunc) {
-      // Returned from function
-      filename = config.filename(target);
-
-    } else {
-      // String
-      filename = config.filename;
-    }
-
-    // Generate page url
-    var url = utils.interpolateName(filename, {
-      path: target.absolutePath,
-      context: context
-    });
-
-    // Template context
-    var defaultContext = {
-      publicPath: compilation.outputOptions.publicPath || '/',
-      sources: targets,
-      source: target
-    };
-
-    var context = contextIsFunc
-      ? merge(defaultContext, config.context.call(compilation, targets))
-      : merge(defaultContext, config.context);
-
-    var content = plugin.render(context);
+    var url = plugin._generateURLForTarget(compilation, target);
+    var content = plugin._render(compilation, targets, target);
 
     target.page = new Page({url: url, content: content});
 
