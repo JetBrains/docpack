@@ -4,6 +4,7 @@ var merge = require('merge-options');
 var utils = require('webpack-toolkit');
 var Page = require('docpack/lib/data/Page');
 var slug = require('url-slug');
+var isPlainObject = require('is-plain-object');
 var ChildCompiler = utils.ChildCompiler;
 
 var defaultConfig = {
@@ -133,22 +134,19 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
 };
 
 /**
- * @param {Compilation} compilation
  * @param {Array<Source>} sources
  * @returns {Array<Source>}
- * @private
  */
-PageGeneratorPlugin.prototype.select = function(compilation, sources) {
+PageGeneratorPlugin.prototype.select = function(sources) {
   var config = this.config;
   var targets = sources;
 
   if (config.match) {
     if (typeof config.match == 'function') {
-      targets = config.match.call(compilation, sources);
+      targets = config.match(sources);
       if (!Array.isArray(targets)) {
-        throw new Error('If `match` provided as function it should return array of objects');
+        throw new Error('`match` should return array of objects');
       }
-
     } else {
       targets = sources.filter(function (source) {
         return utils.matcher(config.match, source.absolutePath);
@@ -160,11 +158,11 @@ PageGeneratorPlugin.prototype.select = function(compilation, sources) {
 };
 
 /**
- * @param {Compilation} compilation
  * @param {Source} target
+ * @param {String} compilationContext Compilation context
  * @returns {String}
  */
-PageGeneratorPlugin.prototype.generateURL = function(compilation, target) {
+PageGeneratorPlugin.prototype.generateURL = function(target, compilationContext) {
   var config = this.config;
   var filename;
   var typeofFilename = typeof config.filename;
@@ -174,43 +172,47 @@ PageGeneratorPlugin.prototype.generateURL = function(compilation, target) {
   }
   else if (typeofFilename == 'string') {
     filename = config.filename;
-
   } else if (typeofFilename == 'function') {
-    filename = config.filename.call(compilation, target);
+    filename = config.filename(target);
     if (typeof filename != 'string') {
       throw new Error('`filename` function should return a string');
     }
-
   } else {
     throw new Error('`filename` option can be string or function');
   }
 
   return utils.interpolateName(filename, {
     path: target.absolutePath,
-    context: compilation.compiler.context,
+    context: compilationContext,
     content: target.content
   });
 };
 
 /**
  * @param {Compilation} compilation
- * @param {Array<Source>} targets
  * @param {Source} target
+ * @param {Array<Source>} targets
  * @returns {String}
- * @private
  */
-PageGeneratorPlugin.prototype.render = function(compilation, targets, target) {
+PageGeneratorPlugin.prototype.render = function(compilation, target, targets) {
   var config = this.config;
 
   var defaultContext = {
-    publicPath: compilation.outputOptions.publicPath || '/',
+    source: target,
     sources: targets,
-    source: target
+    publicPath: compilation.outputOptions.publicPath,
+    assetsByChunkName: utils.getAssetsByChunkName(compilation)
   };
 
-  var context = typeof config.context == 'function'
-    ? merge(defaultContext, config.context.call(compilation, targets))
-    : merge(defaultContext, config.context);
+  var context;
+  if (typeof config.context == 'function') {
+    context = merge(defaultContext, config.context(targets));
+    if (!isPlainObject(context)) {
+      throw new Error('`context` function should return an object');
+    }
+  } else {
+    context = merge(defaultContext, config.context);
+  }
 
   return this.renderer(context);
 };
@@ -221,18 +223,17 @@ PageGeneratorPlugin.prototype.render = function(compilation, targets, target) {
  */
 PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
   var plugin = this;
-  var targets = this.select(compilation, sources);
+  var targets = this.select(sources);
 
-  // Filename & generate content
   targets.forEach(function(target) {
-    var url = plugin.generateURL(compilation, target);
-    var content = plugin.render(compilation, targets, target);
+    var url = plugin.generateURL(target, compilation.compiler.context);
+    var content = plugin.render(compilation, target, targets);
 
     target.page = new Page({url: url, content: content});
 
     if (url in compilation.assets) {
-      var msg = url + ' page already exist in assets. Check `filename` option (and maybe make it more specific).';
-      compilation.errors.push(msg);
+      var msg = url + ' page already exist in assets. Check `filename` option (and maybe make it more specific)';
+      throw new Error(msg);
     }
 
     utils.emitAsset(compilation, url, content);
