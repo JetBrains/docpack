@@ -27,7 +27,7 @@ describe('Docpack Page Generator Plugin', () => {
     });
   });
 
-  describe('_select()', () => {
+  describe('select()', () => {
     var plugin;
     var compilation;
     var sources;
@@ -48,7 +48,7 @@ describe('Docpack Page Generator Plugin', () => {
 
       plugin.config.match = match;
 
-      plugin._select(compilation, sources)
+      plugin.select(compilation, sources)
         .should.be.an('array')
         .and.have.lengthOf(1)
         .and.eql([sources[1]]);
@@ -59,18 +59,18 @@ describe('Docpack Page Generator Plugin', () => {
 
     it('should throw if non-array returned from `match` function', () => {
       plugin.config.match = (sources => sources[0]);
-      (() => plugin._select(compilation, sources)).should.throw();
+      (() => plugin.select(compilation, sources)).should.throw();
     });
 
     it('should allow use regexp as `match` option value', () => {
       plugin.config.match = /2/;
-      var result = plugin._select(compilation, sources);
+      var result = plugin.select(compilation, sources);
       result.should.be.an('array');
       result[0].should.be.equal(sources[1]);
     });
   });
 
-  describe('_generateURL()', () => {
+  describe('generateURL()', () => {
     var plugin;
     var compilation;
     var source;
@@ -88,7 +88,7 @@ describe('Docpack Page Generator Plugin', () => {
 
     it('should allow use string as `filename` option', () => {
       plugin.config.filename = '[name].[ext].html';
-      plugin._generateURL(compilation, source).should.be.equal('source.js.html');
+      plugin.generateURL(compilation, source).should.be.equal('source.js.html');
     });
 
     it('should allow use function as `filename` option (with placeholders)', () => {
@@ -97,18 +97,19 @@ describe('Docpack Page Generator Plugin', () => {
       });
       plugin.config.filename = filename;
 
-      plugin._generateURL(compilation, source).should.equal('source.js.bar.html');
+      plugin.generateURL(compilation, source).should.equal('source.js.bar.html');
       filename.firstCall.args[0].should.equal(source);
       filename.firstCall.thisValue.should.equal(compilation);
     });
 
     it('should throw if non-string returned', () => {
       plugin.config.filename = function() { return 123 };
-      (() => plugin._generateURL(compilation, source)).should.throw();
+      (() => plugin.generateURL(compilation, source)).should.throw();
     });
 
-    it('should allow to use `url` attr from source to generate URL', () => {
-
+    it('should allow to override filename from `url` source attr', () => {
+      source.attrs.url = 'foo.html';
+      plugin.generateURL(compilation, source).should.be.equal('foo.html');
     });
   });
 });

@@ -49,7 +49,7 @@ PageGeneratorPlugin.getCompilerNameFor = function(template) {
 /**
  * @type {Function}
  */
-PageGeneratorPlugin.prototype.render = null;
+PageGeneratorPlugin.prototype.renderer = null;
 
 /**
  * @param {Compiler} compiler
@@ -96,7 +96,7 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
 
   compiler.plugin('compilation', function(compilation) {
     compilation.plugin(Docpack.HOOKS.BEFORE_EXTRACT, function(sources, done) {
-      if (plugin.render) {
+      if (plugin.renderer) {
         done(null, sources);
         return;
       }
@@ -119,7 +119,7 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
 
           return utils.compileVMScript(source)
             .then(function (render) {
-              plugin.render = render;
+              plugin.renderer = render;
               done(null, sources);
             });
         })
@@ -138,7 +138,7 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
  * @returns {Array<Source>}
  * @private
  */
-PageGeneratorPlugin.prototype._select = function(compilation, sources) {
+PageGeneratorPlugin.prototype.select = function(compilation, sources) {
   var config = this.config;
   var targets = sources;
 
@@ -163,14 +163,16 @@ PageGeneratorPlugin.prototype._select = function(compilation, sources) {
  * @param {Compilation} compilation
  * @param {Source} target
  * @returns {String}
- * @private
  */
-PageGeneratorPlugin.prototype._generateURL = function(compilation, target) {
+PageGeneratorPlugin.prototype.generateURL = function(compilation, target) {
   var config = this.config;
   var filename;
   var typeofFilename = typeof config.filename;
 
-  if (typeofFilename == 'string') {
+  if ('attrs' in target && CONST.URL_ATTR_NAME in target.attrs) {
+    filename = target.attrs[CONST.URL_ATTR_NAME];
+  }
+  else if (typeofFilename == 'string') {
     filename = config.filename;
 
   } else if (typeofFilename == 'function') {
@@ -178,9 +180,6 @@ PageGeneratorPlugin.prototype._generateURL = function(compilation, target) {
     if (typeof filename != 'string') {
       throw new Error('`filename` function should return a string');
     }
-
-  } else if ('attrs' in target && CONST.URL_ATTR_NAME in target.attrs) {
-    filename = target.attrs[CONST.URL_ATTR_NAME];
 
   } else {
     throw new Error('`filename` option can be string or function');
@@ -200,7 +199,7 @@ PageGeneratorPlugin.prototype._generateURL = function(compilation, target) {
  * @returns {String}
  * @private
  */
-PageGeneratorPlugin.prototype._render = function(compilation, targets, target) {
+PageGeneratorPlugin.prototype.render = function(compilation, targets, target) {
   var config = this.config;
 
   var defaultContext = {
@@ -213,7 +212,7 @@ PageGeneratorPlugin.prototype._render = function(compilation, targets, target) {
     ? merge(defaultContext, config.context.call(compilation, targets))
     : merge(defaultContext, config.context);
 
-  return this.render(context);
+  return this.renderer(context);
 };
 
 /**
@@ -222,12 +221,12 @@ PageGeneratorPlugin.prototype._render = function(compilation, targets, target) {
  */
 PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
   var plugin = this;
-  var targets = this._select(compilation, sources);
+  var targets = this.select(compilation, sources);
 
   // Filename & generate content
   targets.forEach(function(target) {
-    var url = plugin._generateURL(compilation, target);
-    var content = plugin._render(compilation, targets, target);
+    var url = plugin.generateURL(compilation, target);
+    var content = plugin.render(compilation, targets, target);
 
     target.page = new Page({url: url, content: content});
 
