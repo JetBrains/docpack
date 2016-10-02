@@ -3,7 +3,7 @@ var sinon = require('sinon');
 var merge = require('merge-options');
 var tools = require('webpack-toolkit');
 var Plugin = require('../lib/plugin');
-var docpack = require('docpack');
+var Docpack = require('docpack');
 var Source = require('docpack/lib/data/Source');
 var Page = require('docpack/lib/data/Page');
 
@@ -23,6 +23,68 @@ describe('Docpack Page Generator Plugin', () => {
     it('should properly set config', () => {
       var expected = merge(Plugin.defaultConfig, {template: 'qwe'});
       Plugin({template: 'qwe'}).config.should.eql(expected);
+    });
+  });
+
+  describe('configure()', () => {
+    it('should not extend webpack config if template can be compiled with existing loaders', () => {
+      // resolve extensions
+      var plugin = Plugin({template: 'template.foo'});
+      var compiler = new tools.createCompiler({
+        resolve: {extensions: ['.foo']}
+      });
+
+      plugin.configure(compiler);
+      compiler.options.module.loaders.should.be.empty;
+
+      // matched loaders
+      plugin = Plugin({template: 'template.zzz'});
+      compiler = new tools.createCompiler({
+        module: {loaders: [
+          {test: /\.zzz$/, loader: 'zzz-loader'}
+        ]}
+      });
+      plugin.configure(compiler);
+      compiler.options.module.loaders.should.be.eql([
+        {test: /\.zzz$/, loader: 'zzz-loader'}
+      ]);
+    });
+
+    it('should create `loaders` field of webpack config section if it\'s empty', () => {
+      var plugin = Plugin({template: 'qwe'});
+      var compiler = new tools.createCompiler();
+
+      compiler.options.module.should.not.have.property('loaders');
+      plugin.configure(compiler);
+      compiler.options.module.loaders.should.be.an('array').and.be.empty;
+    });
+
+    it('should use `loader` option if presented', () => {
+      var plugin = Plugin({
+        template: 'qwe',
+        loader: {
+          test: /zzz$/,
+          loader: 'zzz-loader'
+        }
+      });
+      var compiler = new tools.createCompiler();
+
+      plugin.configure(compiler);
+      compiler.options.module.loaders[0].should.be.eql({
+        test: /zzz$/,
+        loader: 'zzz-loader'
+      });
+    });
+
+    it('should use fallback loader if no processing template loaders found', () => {
+      var plugin = Plugin({template: './template.zzz'});
+      var compiler = new tools.createCompiler();
+      plugin.configure(compiler);
+
+      compiler.options.module.loaders[0].should.be.eql({
+        test: /\.zzz$/,
+        loader: require.resolve(Plugin.CONST.FALLBACK_LOADER_NAME)
+      });
     });
   });
 

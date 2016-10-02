@@ -37,6 +37,7 @@ var PageGeneratorPlugin = Docpack.createPlugin({
 
 module.exports = PageGeneratorPlugin;
 module.exports.defaultConfig = defaultConfig;
+module.exports.CONST = CONST;
 
 /**
  * @static
@@ -68,23 +69,15 @@ PageGeneratorPlugin.prototype.configure = function(compiler) {
     moduleOptions.loaders = [];
   }
 
-  // If loader specified explicitly, add them to config
+  // If loader specified explicitly, add it to config
   if (config.loader) {
     moduleOptions.loaders.push(config.loader);
   }
   else if (!hasLoadersToProcessTemplate) {
     // If no loaders to process the template - add fallback loader to config
-    var fallbackLoaderPath;
-
-    try {
-       fallbackLoaderPath = require.resolve(CONST.FALLBACK_LOADER_NAME);
-    } catch (e) {
-      throw new Error('Fallback loader not found');
-    }
-
     moduleOptions.loaders.push({
-      test: new RegExp('\.' + tplExt.substr(1) + '$'),
-      loader: fallbackLoaderPath
+      test: new RegExp('\\.' + tplExt.substr(1) + '$'),
+      loader: require.resolve(CONST.FALLBACK_LOADER_NAME)
     });
   }
 };
