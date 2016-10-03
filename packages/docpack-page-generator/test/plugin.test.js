@@ -88,6 +88,25 @@ describe('Docpack Page Generator Plugin', () => {
     });
   });
 
+  describe('apply()', () => {
+    var compiler = tools.InMemoryCompiler({
+      context: __dirname,
+      entry: './fixtures/entry',
+      plugins: [
+        Docpack().use(Plugin({template: path.resolve(__dirname, './fixtures/template.js')}))
+      ],
+    }).setInputFS(tools.createCachedInputFileSystem());
+
+    it('should work', (done) => {
+      compiler.run()
+        .then(compilation => {
+          debugger;
+          done()
+        })
+        .catch(done)
+    });
+  });
+
   describe('select()', () => {
     var plugin;
     var compilation;
