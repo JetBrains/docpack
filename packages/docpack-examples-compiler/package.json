@@ -1,0 +1,39 @@
+{
+  "name": "docpack-examples-compiler",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/plugin.js",
+  "scripts": {
+    "test": "mocha test/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kisenka/docpack-examples-compiler.git"
+  },
+  "keywords": [
+    "docpack"
+  ],
+  "author": "kisenka <qtuzov@gmail.com> (https://github.com/kisenka)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kisenka/docpack-examples-compiler/issues"
+  },
+  "homepage": "https://github.com/kisenka/docpack-examples-compiler#readme",
+  "files": [
+    "lib/",
+    "README.md"
+  ],
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.5",
+    "sinon-chai": "^2.8.0",
+    "webpack": "^1.13.2"
+  },
+  "dependencies": {
+    "docpack": "^1.7.3-alpha",
+    "webpack-toolkit": "^0.6.2"
+  }
+}
