@@ -88,6 +88,8 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
   var compilerName = PageGeneratorPlugin.getCompilerNameFor(template);
   var assetFilename = CONST.TEMPLATE_ASSET_NAME;
 
+  compiler.plugin(Docpack.HOOKS.INIT, this.configure.bind(this));
+
   compiler.plugin('compilation', function(compilation) {
     compilation.plugin(Docpack.HOOKS.BEFORE_EXTRACT, function(sources, done) {
       if (plugin.renderer) {

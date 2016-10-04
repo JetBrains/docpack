@@ -89,21 +89,58 @@ describe('Docpack Page Generator Plugin', () => {
   });
 
   describe('apply()', () => {
-    var compiler = tools.InMemoryCompiler({
-      context: __dirname,
-      entry: './fixtures/entry',
-      plugins: [
-        Docpack().use(Plugin({template: path.resolve(__dirname, './fixtures/template.js')}))
-      ],
-    }).setInputFS(tools.createCachedInputFileSystem());
+    it('should work with js-templates and should not produce any other assets', (done) => {
+      var plugin = Plugin({
+        template: './template',
+        filename: 'page.html'
+      });
 
-    it('should work', (done) => {
-      compiler.run()
+      tools.InMemoryCompiler({
+        context: path.resolve(__dirname, 'fixtures'),
+        entry: './entry',
+        plugins: [Docpack().use(plugin)]
+      })
+        .setInputFS(tools.createCachedInputFileSystem())
+        .run()
         .then(compilation => {
-          debugger;
-          done()
+          var assets = compilation.assets;
+
+          assets['page.html'].source().should.be.equal('console.log(123);');
+
+          // should not produce any other assets
+          Object.keys(assets).should.be.eql(['main.js', 'page.html']);
+
+          done();
         })
-        .catch(done)
+        .catch(done);
+    });
+
+    it('should work with fallback twig-loader', (done) => {
+      var plugin = Plugin({
+        template: './twig/custom-layout.twig',
+        filename: 'page.html'
+      });
+
+      tools.InMemoryCompiler({
+        context: path.resolve(__dirname, 'fixtures'),
+        entry: './entry',
+        plugins: [Docpack().use(plugin)]
+      })
+        .setInputFS(tools.createCachedInputFileSystem())
+        .run()
+        .then(compilation => {
+          var content = compilation.assets['page.html'].source().trim();
+          var expected = [
+            'header',
+            '  header2\n',
+            'content2',
+            'footer2'
+          ].join('\n');
+
+          content.should.be.equal(expected);
+          done();
+        })
+        .catch(done);
     });
   });
 
