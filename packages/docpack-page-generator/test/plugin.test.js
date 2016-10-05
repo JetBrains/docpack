@@ -92,7 +92,7 @@ describe('Docpack Page Generator Plugin', () => {
     it('should work with js-templates and should not produce any other assets', (done) => {
       var plugin = Plugin({
         template: './template',
-        filename: 'page.html'
+        url: 'page.html'
       });
 
       tools.InMemoryCompiler({
@@ -118,7 +118,7 @@ describe('Docpack Page Generator Plugin', () => {
     it('should work with fallback twig-loader', (done) => {
       var plugin = Plugin({
         template: './twig/custom-layout.twig',
-        filename: 'page.html'
+        url: 'page.html'
       });
 
       tools.InMemoryCompiler({
@@ -208,27 +208,27 @@ describe('Docpack Page Generator Plugin', () => {
       compilation = tools.createCompilation();
     });
 
-    it('should allow use string as `filename` option', () => {
-      plugin.config.filename = '[name].[ext].html';
+    it('should allow use string as `url` option', () => {
+      plugin.config.url = '[name].[ext].html';
       plugin.generateURL(source).should.be.equal('source.js.html');
     });
 
-    it('should allow use function as `filename` option (with placeholders)', () => {
-      var filename = sinon.spy(function(source) {
+    it('should allow use function as `url` option (with placeholders)', () => {
+      var url = sinon.spy(function(source) {
         return `[name].[ext].${source.attrs.foo}.html`;
       });
-      plugin.config.filename = filename;
+      plugin.config.url = url;
 
       plugin.generateURL(source).should.equal('source.js.bar.html');
-      filename.firstCall.args[0].should.equal(source);
+      url.firstCall.args[0].should.equal(source);
     });
 
     it('should throw if non-string returned', () => {
-      plugin.config.filename = function() { return 123 };
+      plugin.config.url = function() { return 123 };
       (() => plugin.generateURL(source)).should.throw();
     });
 
-    it('should allow to override filename from `url` source attr', () => {
+    it('should allow to override url from `url` source attr', () => {
       source.attrs.url = 'foo.html';
       plugin.generateURL(source).should.be.equal('foo.html');
     });
@@ -303,7 +303,7 @@ describe('Docpack Page Generator Plugin', () => {
     before(() => {
       plugin = Plugin({
         template: 'qwe',
-        filename: '[name].html'
+        url: '[name].html'
       });
       plugin.renderer = function(context) {
         return 'qwe';

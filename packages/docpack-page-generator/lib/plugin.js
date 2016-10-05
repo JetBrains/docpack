@@ -10,7 +10,7 @@ var ChildCompiler = utils.ChildCompiler;
 var defaultConfig = {
   match: null,
   template: null,
-  filename: '[path][name].[ext].html',
+  url: '[path][name].[ext].html',
   context: {},
   recompileOnTemplateChange: false,
   loader: null
@@ -159,24 +159,24 @@ PageGeneratorPlugin.prototype.select = function(sources) {
  */
 PageGeneratorPlugin.prototype.generateURL = function(target, compilationContext) {
   var config = this.config;
-  var filename;
-  var typeofFilename = typeof config.filename;
+  var url;
+  var typeofURL = typeof config.url;
 
   if ('attrs' in target && CONST.URL_ATTR_NAME in target.attrs) {
-    filename = target.attrs[CONST.URL_ATTR_NAME];
+    url = target.attrs[CONST.URL_ATTR_NAME];
   }
-  else if (typeofFilename == 'string') {
-    filename = config.filename;
-  } else if (typeofFilename == 'function') {
-    filename = config.filename(target);
-    if (typeof filename != 'string') {
-      throw new Error('`filename` function should return a string');
+  else if (typeofURL == 'string') {
+    url = config.url;
+  } else if (typeofURL == 'function') {
+    url = config.url(target);
+    if (typeof url != 'string') {
+      throw new Error('`url` function should return a string');
     }
   } else {
-    throw new Error('`filename` option can be string or function');
+    throw new Error('`url` option can be string or function');
   }
 
-  return utils.interpolateName(filename, {
+  return utils.interpolateName(url, {
     path: target.absolutePath,
     context: compilationContext,
     content: target.content
@@ -227,7 +227,7 @@ PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
     target.page = new Page({url: url, content: content});
 
     if (url in compilation.assets) {
-      var msg = url + ' page already exist in assets. Check `filename` option (and maybe make it more specific)';
+      var msg = url + ' page already exist in assets. Check `url` option (and maybe make it more specific)';
       throw new Error(msg);
     }
 
