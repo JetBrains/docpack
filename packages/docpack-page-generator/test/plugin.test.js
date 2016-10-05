@@ -114,34 +114,6 @@ describe('Docpack Page Generator Plugin', () => {
         })
         .catch(done);
     });
-
-    it('should work with fallback twig-loader', (done) => {
-      var plugin = Plugin({
-        template: './twig/custom-layout.twig',
-        url: 'page.html'
-      });
-
-      tools.InMemoryCompiler({
-        context: path.resolve(__dirname, 'fixtures'),
-        entry: './entry',
-        plugins: [Docpack().use(plugin)]
-      })
-        .setInputFS(tools.createCachedInputFileSystem())
-        .run()
-        .then(compilation => {
-          var content = compilation.assets['page.html'].source().trim();
-          var expected = [
-            'header',
-            '  header2\n',
-            'content2',
-            'footer2'
-          ].join('\n');
-
-          content.should.be.equal(expected);
-          done();
-        })
-        .catch(done);
-    });
   });
 
   describe('select()', () => {

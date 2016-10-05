@@ -1,11 +1,10 @@
 var path = require('path');
 var Docpack = require('docpack');
 var merge = require('merge-options');
-var utils = require('webpack-toolkit');
+var tools = require('webpack-toolkit');
 var Page = require('docpack/lib/data/Page');
 var slug = require('url-slug');
 var isPlainObject = require('is-plain-object');
-var ChildCompiler = utils.ChildCompiler;
 
 var defaultConfig = {
   match: null,
@@ -63,7 +62,7 @@ PageGeneratorPlugin.prototype.configure = function(compiler) {
 
   var resolveExtensions = compiler.options.resolve.extensions;
   var moduleOptions = compiler.options.module;
-  var hasLoadersToProcessTemplate = resolveExtensions.indexOf(tplExt) >= 0 || utils.getMatchedLoaders(moduleOptions, tpl).length > 0;
+  var hasLoadersToProcessTemplate = resolveExtensions.indexOf(tplExt) >= 0 || tools.getMatchedLoaders(moduleOptions, tpl).length > 0;
 
   if (!Array.isArray(moduleOptions.loaders)) {
     moduleOptions.loaders = [];
@@ -97,28 +96,18 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
         return;
       }
 
-      var templateCompiler = new ChildCompiler(compilation, {
+      tools.TemplateCompiler(compilation, {
+        template: template,
         name: compilerName,
         output: {
           filename: assetFilename
         }
-      });
-
-      templateCompiler.addEntry(template, assetFilename);
-
-      templateCompiler.run()
-        .then(function (compilation) {
-          var source = compilation.assets[assetFilename].source();
-
-          delete compilation.assets[assetFilename];
-          delete compilation.compiler.parentCompilation.assets[assetFilename];
-
-          return utils.compileVMScript(source)
-            .then(function (render) {
-              plugin.renderer = render;
-              done(null, sources);
-            });
-        })
+      })
+        .run()
+        .then(function (fn) {
+          plugin.renderer = fn;
+          done(null, sources);
+        });
     });
 
     compilation.plugin(Docpack.HOOKS.GENERATE, function (sources, done) {
@@ -144,7 +133,7 @@ PageGeneratorPlugin.prototype.select = function(sources) {
       }
     } else {
       targets = sources.filter(function (source) {
-        return utils.matcher(config.match, source.absolutePath);
+        return tools.matcher(config.match, source.absolutePath);
       });
     }
   }
@@ -176,7 +165,7 @@ PageGeneratorPlugin.prototype.generateURL = function(target, compilationContext)
     throw new Error('`url` option can be string or function');
   }
 
-  return utils.interpolateName(url, {
+  return tools.interpolateName(url, {
     path: target.absolutePath,
     context: compilationContext,
     content: target.content
@@ -196,7 +185,7 @@ PageGeneratorPlugin.prototype.render = function(compilation, target, targets) {
     source: target,
     sources: targets,
     publicPath: compilation.outputOptions.publicPath,
-    assetsByChunkName: utils.getAssetsByChunkName(compilation)
+    assetsByChunkName: tools.getAssetsByChunkName(compilation)
   };
 
   var context;
@@ -231,6 +220,6 @@ PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
       throw new Error(msg);
     }
 
-    utils.emitAsset(compilation, url, content);
+    tools.emitAsset(compilation, url, content);
   });
 };
