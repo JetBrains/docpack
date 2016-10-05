@@ -6,7 +6,7 @@ var MemoryFS = require('memory-fs');
 function createContext(context) {
   var sharedData;
 
-  if ('sharedData' in context) {
+  if (context && 'sharedData' in context) {
     sharedData = context.sharedData;
     delete context.sharedData;
   }
@@ -41,7 +41,7 @@ describe('docpack-examples-compiler/loader', () => {
   });
 
   it('should throw when shared data is undefined', () => {
-    return createContext({sharedData: undefined}).run(loader).should.be.rejectedWith('Undefined is not allowed');
+    return createContext().run(loader).should.be.rejectedWith('Undefined is not allowed');
   });
 
   it('should throw when shared data not found', () => {
