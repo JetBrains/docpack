@@ -28,6 +28,7 @@
     "bluebird": "^3.4.6",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
+    "extract-text-webpack-plugin": "^1.0.1",
     "istanbul": "^0.4.5",
     "memory-fs": "^0.3.0",
     "mocha": "^3.0.2",
@@ -39,6 +40,7 @@
     "docpack": "^1.7.3-alpha",
     "dotty": "0.0.2",
     "loader-utils": "^0.2.16",
+    "merge-options": "0.0.64",
     "webpack-toolkit": "^0.6.2"
   }
 }
