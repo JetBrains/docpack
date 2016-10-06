@@ -16,7 +16,7 @@ function createContext(context) {
   return ctx;
 }
 
-describe('docpack-examples-compiler/loader', () => {
+describe('Loader', () => {
   it('should be cacheable & async', (done) => {
     var context = createContext({sharedData: '1'});
 
