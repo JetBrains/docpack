@@ -1,6 +1,8 @@
 var path = require('path');
 var resolve = path.resolve;
 var sinon = require('sinon');
+var format = require('util').format;
+var sharedDataLoaderPath = require.resolve('../lib/loader');
 
 var ExamplesCompiler = require('../lib/ExamplesCompiler');
 var tools = require('webpack-toolkit');
@@ -9,6 +11,9 @@ var loader = require('../lib/loader');
 var ExampleFile = require('docpack/lib/data/ExampleFile');
 var TextExtractPlugin = require('extract-text-webpack-plugin');
 var getHash = require('loader-utils').getHashDigest;
+
+var fixturesPath = resolve(__dirname, 'fixtures');
+var entryPath = resolve(fixturesPath, './dummy.js');
 
 describe('ExamplesCompiler', () => {
   it('should export static fields', () => {
@@ -35,12 +40,12 @@ describe('ExamplesCompiler', () => {
         outputFilename: 'qwe',
         output: {filename: 'tralalala'}
       });
-      compiler._compiler.options.output.filename.should.be.equal('[name]');
+      compiler._compiler.options.output.filename.should.be.equal('[name].js');
     });
   });
 
   describe('#getLoadersToProcessExampleFile()', () => {
-    var test = function(file, loadersConfig, filename) {
+    var test = function (file, loadersConfig, filename) {
       var f = new ExampleFile({type: file.type, content: file.content || ''});
       return ExamplesCompiler.getLoadersToProcessExampleFile(
         f,
@@ -73,10 +78,13 @@ describe('ExamplesCompiler', () => {
     it('should work with extract-text-webpack-plugin', () => {
       var textExtractPluginCase = test(
         {type: 'scss'},
-        {loaders: [{
-          test: /\.scss$/,
-          loader: TextExtractPlugin.extract('css!scss')}
-        ]}
+        {
+          loaders: [{
+            test: /\.scss$/,
+            loader: TextExtractPlugin.extract('css!scss')
+          }
+          ]
+        }
       );
 
       textExtractPluginCase.should.be.lengthOf(1);
@@ -87,42 +95,55 @@ describe('ExamplesCompiler', () => {
   });
 
   describe('addFile()', () => {
-    var fixturesPath = resolve(__dirname, 'fixtures');
-    var compilation = createCompilation({context: fixturesPath, entry: './dummy'});
+    var compilation;
+    var file;
+    var getLoaders;
+    var getFilename;
+    var addEntry;
 
-    it('should work', (done) => {
-      new tools.InMemoryCompiler({
-        context: fixturesPath,
-        entry: './dummy',
-        output: {
-          filename: '[name].js'
-        }
-      })
-        .setInputFS(tools.createCachedInputFileSystem())
-        .run()
-        .then(function(parentCompilation) {
-          var compiler = new ExamplesCompiler(parentCompilation);
-          var file = new ExampleFile({type: 'js', content: 'console.log(456);'});
-          var file2 = new ExampleFile({type: 'js', content: 'console.log(789);'});
+    beforeEach(() => {
+      compilation = createCompilation({context: fixturesPath, entry: './dummy'});
+      file = new ExampleFile({type: 'js', content: 'console.log(456);'});
+      getLoaders = sinon.spy(ExamplesCompiler.prototype, 'getLoadersToProcessExampleFile');
+      getFilename = sinon.spy(ExamplesCompiler.prototype, 'getOutputFilename');
+      addEntry = sinon.spy(ExamplesCompiler.prototype, 'addEntry');
+    });
 
-          var info1 = compiler.addFile(file, resolve(fixturesPath, './dummy'));
-          var info2 = compiler.addFile(file2, resolve(fixturesPath, './dummy'));
+    afterEach(() => {
+      ExamplesCompiler.prototype.getLoadersToProcessExampleFile.restore();
+      ExamplesCompiler.prototype.getOutputFilename.restore();
+      ExamplesCompiler.prototype.addEntry.restore();
+    });
 
-          return compiler.run()
-            .then(function (compilation) {
-              var i1 = info1;
-              var i2 = info2;
-              var chunks = tools.getAssetsByChunkName(compilation);
-              debugger;
-              done();
-            });
-        })
-        .catch(done);
+    it('should add file to storage and create entry point', () => {
+      var compiler = new ExamplesCompiler(compilation, {outputFilename: 'example'});
+      var fullRequest = format(
+        '!!%s?%s!%s',
+        sharedDataLoaderPath,
+        JSON.stringify({path: '0.content', hash: getHash(file.content)}),
+        entryPath
+      );
+
+      compiler.addFile(file, entryPath);
+
+      compiler.files[0].should.be.equal(file);
+
+      getLoaders.should.have.been.calledOnce
+        .and.calledWith(file)
+        .and.returned([]);
+
+      getFilename.should.have.been.calledOnce
+        .and.calledWith(file, entryPath)
+        .and.returned(`example`);
+
+      addEntry.should.have.been.calledOnce
+        .and.calledWith(fullRequest, 'example', compiler._compiler.context);
+
     });
   });
 
   describe('getOutputFilename()', () => {
-    var test = function(file, resourcePath, outputFilename) {
+    var test = function (file, resourcePath, outputFilename) {
       var compiler = ExamplesCompiler(createCompilation(), {
         outputFilename: outputFilename || ExamplesCompiler.defaultConfig.outputFilename
       });
@@ -133,13 +154,57 @@ describe('ExamplesCompiler', () => {
     };
 
     it('should fix case when content of the file is empty string', () => {
-      test({type: 'js', content: ''}, resolve('./qwe'))
+      test({type: 'js', content: ''}, resolve('./qwe'), '[hash]')
         .should.be.equal(`${getHash(' ')}`);
     });
 
     it('should properly replace [type] placeholder', () => {
       test({type: 'css', content: ''}, resolve('./qwe'), '[name].[type]')
         .should.be.equal('qwe.css');
+    });
+  });
+
+  describe('run()', () => {
+    it('should compile simple js', (done) => {
+      var compilation = createCompilation({context: fixturesPath, entry: './dummy'});
+      var compiler = new ExamplesCompiler(compilation, {outputFilename: 'example'});
+
+      var file = new ExampleFile({type: 'js', content: 'console.log(456)'});
+      compiler.addFile(file, entryPath);
+
+      compiler.run()
+        .then(compilation => {
+          compilation.assets['example.js'].source().should.contain('console.log(456)');
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should work with CSS & TextExtractPlugin', (done) => {
+      var compilation = createCompilation({
+        context: fixturesPath,
+        entry: './dummy',
+        module: {
+          loaders: [{
+            test: /\.css$/,
+            loader: TextExtractPlugin.extract('css')
+          }]
+        },
+        plugins: [new TextExtractPlugin('[name].css')]
+      });
+      var compiler = new ExamplesCompiler(compilation, {outputFilename: 'example'});
+
+      var file = new ExampleFile({type: 'css', content: '.red {color: red}'});
+      compiler.addFile(file, entryPath);
+
+      compiler.run()
+        .then(compilation => {
+          var assets = compilation.assets;
+          Object.keys(assets).should.be.eql(['example.js', 'example.css']);
+          assets['example.css'].source().should.be.equal('.red {color: red}');
+          done();
+        })
+        .catch(done);
     });
   });
 });

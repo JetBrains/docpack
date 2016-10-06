@@ -19,8 +19,8 @@ var defaultConfig = {
   // Used for loaders matching, can be overridden via ExampleFile attrs.filename
   filename: 'example.[type]',
 
-  // Used for naming emitted files
-  outputFilename: '[hash].[type]',
+  // Used for naming emitted files. Extension will be appended automatically
+  outputFilename: 'examples/[hash]',
   name: 'ExamplesCompiler'
 };
 
@@ -40,26 +40,26 @@ function ExamplesCompiler(compilation, config) {
   this.config = merge(defaultConfig, config || {});
 
   ChildCompiler.call(this, compilation, this.config);
+  var compiler = this._compiler;
 
   /**
    * We need to create named entries, so child compiler output
    * filename should be set to [name] (name of entry)
    */
-  this._compiler.options.output.filename = '[name]';
+  compiler.options.output.filename = '[name].js';
 
   /**
    * We will extract example files content for compilation via special loader,
    * so we share array with example files between compiler and loader
    */
-  loader.plugInCompiler(this._compiler, this.files);
+  loader.plugInCompiler(compiler, this.files);
 
-  //parentCompilerPlugins
-  //.filter(function (plugin) {
-  //  return !(plugin instanceof DocsPlugin) && !(plugin instanceof Plugin)
-  //})
-  //.forEach(function (plugin) {
-  //  compiler.apply(plugin)
-  //});
+  var parentCompilerPlugins = compilation.compiler.options.plugins || [];
+
+  // Apply parent compiler plugins to this compiler
+  parentCompilerPlugins.forEach(function (plugin) {
+    compiler.apply(plugin);
+  });
 }
 
 module.exports = ExamplesCompiler;
@@ -115,20 +115,22 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
   var fileIndex = this.files.indexOf(file);
 
   // Get loaders to process example file
-  var loaders = this.getLoadersToProcessExampleFile(file);
+  var matchedLoaders = this.getLoadersToProcessExampleFile(file);
 
   // Shared loader config
   var sharedDataLoaderConfig = {
     loader: SHARED_DATA_LOADER_PATH,
     query: {
-      hash: getHash(file.content),
-      path: fileIndex.toString() + '.content'
+      path: fileIndex.toString() + '.content',
+      hash: getHash(file.content)
     }
   };
 
-  loaders.push(sharedDataLoaderConfig);
+  var loadersRequest = matchedLoaders
+    .concat([sharedDataLoaderConfig])
+    .map(tools.stringifyLoaderConfig)
+    .join('!');
 
-  var loadersRequest = loaders.map(tools.stringifyLoaderConfig).join('!');
   var fullRequest = format('!!%s!%s', loadersRequest, resourcePath);
 
   // Get file output name
@@ -140,7 +142,7 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
   return {
     file: file,
     entryName: entryName,
-    loaders: loaders,
+    loaders: matchedLoaders,
     loadersRequest: loadersRequest,
     fullRequest: fullRequest
   }
@@ -159,13 +161,11 @@ ExamplesCompiler.prototype.getOutputFilename = function(file, resourcePath) {
    * @see https://github.com/webpack/loader-utils/blob/master/index.js#L274
    */
   var content = file.content === '' ? ' ' : file.content;
-
-  return tools.interpolateName(outputFilename, {
+  var entryName = tools.interpolateName(outputFilename, {
     path: resourcePath,
     content: content,
-    context: file.context || this._compiler.context,
-    replacements: {
-      '[type]': file.type || 'js'
-    }
+    context: file.context || this._compiler.context
   });
+
+  return entryName;
 };
