@@ -16,12 +16,12 @@ var format = require('util').format;
 var SHARED_DATA_LOADER_PATH = require.resolve('./loader');
 
 var defaultConfig = {
-  // used for loaders matching, can be overridden via ExampleFile attrs.filename
+  // Used for loaders matching, can be overridden via ExampleFile attrs.filename
   filename: 'example.[type]',
-  name: 'ExamplesCompiler',
-  output: {
-    filename: '[hash].[type]'
-  }
+
+  // Used for naming emitted files
+  outputFilename: '[hash]',
+  name: 'ExamplesCompiler'
 };
 
 /**
@@ -36,12 +36,21 @@ function ExamplesCompiler(compilation, config) {
     return new ExamplesCompiler(compilation, config);
   }
 
-  var cfg = merge(defaultConfig, config || {});
-  this.config = cfg;
   this.files = [];
+  this.config = merge(defaultConfig, config || {});
 
-  ChildCompiler.call(this, compilation, cfg);
+  ChildCompiler.call(this, compilation, this.config);
 
+  /**
+   * We need to create named entries, so child compiler output
+   * filename should be set to [name] (name of entry)
+   */
+  this._compiler.options.output.filename = '[name]';
+
+  /**
+   * We will extract example files content for compilation via special loader,
+   * so we share array with example files between compiler and loader
+   */
   loader.plugInCompiler(this._compiler, this.files);
 
   //parentCompilerPlugins
@@ -102,7 +111,8 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
   var compilationContext = file.context || this._compiler.context;
 
   // Add file
-  var fileIndex = this.files.push(file);
+  this.files.push(file);
+  var fileIndex = this.files.indexOf(file);
 
   // Get loaders to process example file
   var loaders = this.getLoadersToProcessExampleFile(file);
@@ -112,7 +122,7 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
     loader: SHARED_DATA_LOADER_PATH,
     query: {
       hash: getHash(file.content),
-      path: fileIndex.toString()
+      path: fileIndex.toString() + '.content'
     }
   };
 
@@ -125,9 +135,10 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
   var entryName = this.getOutputFilename(file, resourcePath);
 
   // Add entry to compiler
-  tools.addEntry(this._compiler, fullRequest, entryName, compilationContext);
+  this.addEntry(fullRequest, entryName);
 
   return {
+    file: file,
     entryName: entryName,
     loaders: loaders,
     loadersRequest: loadersRequest,
@@ -136,17 +147,22 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
 };
 
 /**
- *
  * @param {ExampleFile} file
  * @param {String} resourcePath
  * @returns {String}
  */
 ExamplesCompiler.prototype.getOutputFilename = function(file, resourcePath) {
-  var outputFilename = this.config.output.filename;
+  var outputFilename = this.config.outputFilename;
+
+  /**
+   * Fixes case when file.content string is defined, but empty
+   * @see https://github.com/webpack/loader-utils/blob/master/index.js#L274
+   */
+  var content = file.content === '' ? ' ' : file.content;
 
   return tools.interpolateName(outputFilename, {
     path: resourcePath,
-    content: file.content,
+    content: content,
     context: file.context || this._compiler.context,
     replacements: {
       '[type]': file.type || 'js'
