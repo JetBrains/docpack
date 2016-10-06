@@ -20,7 +20,7 @@ var defaultConfig = {
   filename: 'example.[type]',
 
   // Used for naming emitted files
-  outputFilename: '[hash]',
+  outputFilename: '[hash].[type]',
   name: 'ExamplesCompiler'
 };
 
@@ -135,7 +135,7 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
   var entryName = this.getOutputFilename(file, resourcePath);
 
   // Add entry to compiler
-  this.addEntry(fullRequest, entryName);
+  this.addEntry(fullRequest, entryName, compilationContext);
 
   return {
     file: file,
