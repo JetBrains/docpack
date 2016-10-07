@@ -25,18 +25,20 @@ function createSpiedPluginBody() {
 }
 
 describe('Docpack', () => {
-  describe('static props', () => {
+  it('statics', () => {
+    Object.keys(Docpack).should.be.eql([
+      "API_VERSION",
+      "HOOKS",
+      "defaultConfig",
+      "DocpackPlugin",
+      "createPlugin"
+    ]);
+
     Docpack.should.have.property('API_VERSION').and.be.a('string');
     Docpack.should.have.property('HOOKS').and.be.eql(HOOKS);
     Docpack.should.have.property('defaultConfig').and.be.an('object');
-  });
-
-  describe('static methods', () => {
-    describe('createPlugin()', () => {
-      it('should exist', () => {
-        Docpack.createPlugin.should.exist.and.be.a('function').and.be.equal(createPlugin);
-      });
-    });
+    Docpack.should.have.property('DocpackPlugin').and.be.equal(DocpackPlugin);
+    Docpack.should.have.property('createPlugin').and.be.equal(createPlugin);
   });
 
   describe('constructor()', () => {
