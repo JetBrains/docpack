@@ -77,7 +77,7 @@ describe('Docpack', () => {
       docpack.plugins[0].should.be.instanceOf(DocpackPlugin);
     });
 
-    it('should return docpack instance', () => {
+    it('should return docpack instance (chainable)', () => {
       var Plugin = createPlugin();
       Docpack().use(Plugin()).should.be.instanceOf(Docpack);
     });
