@@ -205,6 +205,9 @@ describe('Docpack', () => {
 
       it('should skip child compilations', (done) => {
         var docpack = Docpack();
+        var plugin = createSpiedPluginBody();
+        docpack.use(HOOKS.BEFORE_EXTRACT, plugin);
+
         sinon.spy(docpack, 'apply');
 
         InMemoryCompiler({plugins: [docpack]})
@@ -218,6 +221,8 @@ describe('Docpack', () => {
             docpack.apply.should.have.been.calledTwice;
             docpack.apply.getCall(0).returnValue.should.be.true;
             docpack.apply.getCall(1).returnValue.should.be.false;
+            plugin.should.have.been.calledOnce;
+
             docpack.apply.restore();
             done();
           })
