@@ -1,6 +1,7 @@
 var path = require('path');
 var sinon = require('sinon');
 var shuffleArray = require('shuffle-array');
+var tools = require('webpack-toolkit');
 var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
 var MemoryFS = require('memory-fs');
 
@@ -137,10 +138,6 @@ describe('Docpack', () => {
         }, {inputFS: fs});
       });
 
-      afterEach(() => {
-        fs = compiler = null;
-      });
-
       it('should throw if invalid type returned from plugin', () => {
         var docpack = Docpack()
           .use(HOOKS.BEFORE_EXTRACT, (sources, done) => done(null, 'qwe'));
@@ -204,6 +201,26 @@ describe('Docpack', () => {
           done();
         })
         .catch(done);
+      });
+
+      it('should skip child compilations', (done) => {
+        var docpack = Docpack();
+        sinon.spy(docpack, 'apply');
+
+        InMemoryCompiler({plugins: [docpack]})
+          .run()
+          .then(compilation => {
+            var childCompiler = tools.ChildCompiler(compilation);
+            childCompiler._compiler.apply(docpack);
+            return childCompiler.run();
+          })
+          .then(compilation => {
+            docpack.apply.should.have.been.calledTwice;
+            docpack.apply.getCall(0).returnValue.should.be.true;
+            docpack.apply.getCall(1).returnValue.should.be.false;
+            done()
+          })
+          .catch(done);
       });
     });
   });
