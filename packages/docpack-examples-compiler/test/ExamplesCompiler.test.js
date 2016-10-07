@@ -2,7 +2,6 @@ var path = require('path');
 var resolve = path.resolve;
 var sinon = require('sinon');
 var format = require('util').format;
-var sharedDataLoaderPath = require.resolve('../lib/loader');
 
 var ExamplesCompiler = require('../lib/ExamplesCompiler');
 var tools = require('webpack-toolkit');
@@ -11,7 +10,10 @@ var loader = require('../lib/loader');
 var ExampleFile = require('docpack/lib/data/ExampleFile');
 var TextExtractPlugin = require('extract-text-webpack-plugin');
 var getHash = require('loader-utils').getHashDigest;
+var Docpack = require('docpack');
+var DocpackPlugin = require('docpack/lib/utils/DocpackPlugin');
 
+var sharedDataLoaderPath = require.resolve('../lib/loader');
 var fixturesPath = resolve(__dirname, 'fixtures');
 var entryPath = resolve(fixturesPath, './dummy.js');
 
@@ -41,6 +43,23 @@ describe('ExamplesCompiler', () => {
         output: {filename: 'tralalala'}
       });
       compiler._compiler.options.output.filename.should.be.equal('[name].js');
+    });
+
+    it('should apply parent compiler plugins to examples compiler & skip Docpack plugins', () => {
+      var plugin = {apply: function() {}};
+      var docpack = Docpack();
+      var docpackPlugin = Docpack.createPlugin({apply: function() {}})();
+
+      var compilation = createCompilation({
+        plugins: [plugin, docpack, docpackPlugin]
+      });
+
+      var compiler = ExamplesCompiler(compilation, {applyParentCompilerPlugins: false});
+      sinon.spy(compiler._compiler, 'apply');
+
+      compiler.applyParentCompilerPlugins();
+      compiler._compiler.apply.should.have.been.calledOnce.and.calledWith(plugin);
+      compiler._compiler.apply.restore();
     });
   });
 
@@ -134,11 +153,10 @@ describe('ExamplesCompiler', () => {
 
       getFilename.should.have.been.calledOnce
         .and.calledWith(file, entryPath)
-        .and.returned(`example`);
+        .and.returned('example');
 
       addEntry.should.have.been.calledOnce
         .and.calledWith(fullRequest, 'example', compiler._compiler.context);
-
     });
   });
 
@@ -156,11 +174,6 @@ describe('ExamplesCompiler', () => {
     it('should fix case when content of the file is empty string', () => {
       test({type: 'js', content: ''}, resolve('./qwe'), '[hash]')
         .should.be.equal(`${getHash(' ')}`);
-    });
-
-    it('should properly replace [type] placeholder', () => {
-      test({type: 'css', content: ''}, resolve('./qwe'), '[name].[type]')
-        .should.be.equal('qwe.css');
     });
   });
 

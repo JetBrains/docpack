@@ -5,6 +5,9 @@ var loader = require('./loader');
 var getHash = require('loader-utils').getHashDigest;
 var format = require('util').format;
 
+var Docpack = require('docpack');
+var DocpackPlugin = require('docpack/lib/utils/DocpackPlugin');
+
 /**
  * @typedef {ChildCompilerConfig} ExamplesCompilerConfig
  */
@@ -16,11 +19,25 @@ var format = require('util').format;
 var SHARED_DATA_LOADER_PATH = require.resolve('./loader');
 
 var defaultConfig = {
-  // Used for loaders matching, can be overridden via ExampleFile attrs.filename
+  /**
+   * Used for loaders matching, can be overridden via ExampleFile attrs.filename
+   */
   filename: 'example.[type]',
 
-  // Used for naming emitted files. Extension will be appended automatically
+  /**
+   * Used for naming emitted files.
+   * Extension will be appended automatically (technically - the name of entry point).
+   */
   outputFilename: 'examples/[hash]',
+
+  /**
+   * Don't touch this, only for testing purposes!
+   */
+  applyParentCompilerPlugins: true,
+
+  /**
+   * Compiler name
+   */
   name: 'ExamplesCompiler'
 };
 
@@ -54,12 +71,9 @@ function ExamplesCompiler(compilation, config) {
    */
   loader.plugInCompiler(compiler, this.files);
 
-  var parentCompilerPlugins = compilation.compiler.options.plugins || [];
-
-  // Apply parent compiler plugins to this compiler
-  parentCompilerPlugins.forEach(function (plugin) {
-    compiler.apply(plugin);
-  });
+  if (this.config.applyParentCompilerPlugins) {
+    this.applyParentCompilerPlugins();
+  }
 }
 
 module.exports = ExamplesCompiler;
@@ -89,6 +103,19 @@ ExamplesCompiler.prototype.config = null;
  * @type {Array<ExampleFile>}
  */
 ExamplesCompiler.prototype.files = null;
+
+ExamplesCompiler.prototype.applyParentCompilerPlugins = function() {
+  var compiler = this._compiler;
+  var parentCompilerPlugins = compiler.parentCompilation.compiler.options.plugins || [];
+
+  parentCompilerPlugins
+    .filter(function(plugin) {
+      return !(plugin instanceof Docpack) && !(plugin instanceof DocpackPlugin)
+    })
+    .forEach(function(plugin) {
+      compiler.apply(plugin);
+    });
+};
 
 /**
  * @param {ExampleFile} file
