@@ -87,9 +87,11 @@ ExamplesCompiler.defaultConfig = defaultConfig;
  * @returns {Array<Object>}
  */
 ExamplesCompiler.getLoadersToProcessExampleFile = function (file, filename, loadersConfig) {
-  var filenameToMatch = filename.replace('[type]', file.type);
-  var loaders = tools.getMatchedLoaders(loadersConfig, filenameToMatch);
-  return loaders;
+  var filenameToMatch = (file.attrs && typeof file.attrs.filename == 'string')
+    ? file.attrs.filename
+    : filename.replace('[type]', file.type);
+
+  return tools.getMatchedLoaders(loadersConfig, filenameToMatch);
 };
 
 ExamplesCompiler.prototype = Object.create(ChildCompiler.prototype);

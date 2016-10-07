@@ -65,13 +65,20 @@ describe('ExamplesCompiler', () => {
 
   describe('#getLoadersToProcessExampleFile()', () => {
     var test = function (file, loadersConfig, filename) {
-      var f = new ExampleFile({type: file.type, content: file.content || ''});
+      var f = new ExampleFile({type: file.type, content: file.content || '', attrs: file.attrs});
       return ExamplesCompiler.getLoadersToProcessExampleFile(
         f,
         filename || ExamplesCompiler.defaultConfig.filename,
         loadersConfig || {}
       )
     };
+
+    it('should allow to override example filename via attrs.filename', () => {
+      var r = test(
+        {type: 'qwe', attrs: {filename: 'custom.css'}},
+        {loaders: [{test: /custom\.css$/, loader: 'css'}]}
+      ).should.be.eql([{test: /custom\.css$/, loader: 'css'}]);
+    });
 
     it('should work with js', () => {
       test(
