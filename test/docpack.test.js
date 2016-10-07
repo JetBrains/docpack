@@ -218,7 +218,8 @@ describe('Docpack', () => {
             docpack.apply.should.have.been.calledTwice;
             docpack.apply.getCall(0).returnValue.should.be.true;
             docpack.apply.getCall(1).returnValue.should.be.false;
-            done()
+            docpack.apply.restore();
+            done();
           })
           .catch(done);
       });
