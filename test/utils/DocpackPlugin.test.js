@@ -1,7 +1,7 @@
 var DocpackPlugin = require('../../lib/utils/DocpackPlugin');
 var create = DocpackPlugin.create;
 
-var UNNAMED = 'UNNAMED';
+var UNNAMED_PLUGIN_NAME = DocpackPlugin.UNNAMED_PLUGIN_NAME;
 
 describe('Docpack Plugin', () => {
   it('should allow to create without any arguments', () => {
@@ -28,10 +28,10 @@ describe('Docpack Plugin', () => {
 
   describe('Plugin name', () => {
     it('should set unnamed if no name passed', () => {
-      create()()._name.should.be.equals(UNNAMED);
-      create()().getName().should.be.equals(UNNAMED);
-      create(function () {})()._name.should.be.equals(UNNAMED);
-      create(function () {})().getName().should.be.equals(UNNAMED);
+      create()()._name.should.be.equals(UNNAMED_PLUGIN_NAME);
+      create()().getName().should.be.equals(UNNAMED_PLUGIN_NAME);
+      create(function () {})()._name.should.be.equals(UNNAMED_PLUGIN_NAME);
+      create(function () {})().getName().should.be.equals(UNNAMED_PLUGIN_NAME);
     });
 
     it('should properly set plugin name', () => {
