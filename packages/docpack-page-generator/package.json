@@ -27,7 +27,7 @@
     "is-plain-object": "^2.0.1",
     "twig-loader": "^0.2.3",
     "url-slug": "^2.0.0",
-    "webpack-toolkit": "^0.6.0"
+    "webpack-toolkit": "^0.7.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
