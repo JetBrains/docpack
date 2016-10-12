@@ -43,6 +43,6 @@
     "is-plain-object": "^2.0.1",
     "loader-utils": "^0.2.10",
     "merge-options": "0.0.64",
-    "webpack-toolkit": ">0.1.0 <1.0.1"
+    "webpack-toolkit": "^0.7.0"
   }
 }
