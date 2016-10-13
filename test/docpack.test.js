@@ -122,6 +122,35 @@ describe('Docpack', () => {
         .catch(done);
     });
 
+    it('should always process original sources', (done) => {
+      var docpack = Docpack();
+      var compiler = InMemoryCompiler({
+        context: '/',
+        entry: './entry',
+        module: {
+          loaders: [
+            {
+              test: /\.js$/,
+              loader: require.resolve('null-loader')
+            }
+          ]
+        },
+        plugins: [docpack]
+      });
+
+      compiler.setInputFS(new MemoryFS({
+        'entry.js': new Buffer('console.log(123)')
+      }));
+
+      compiler.run()
+        .then(compilation => {
+          var content = docpack.sources[0].content;
+          content.should.be.equal('console.log(123)');
+          done()
+        })
+        .catch(done);
+    });
+
     describe('Hooks', () => {
       var fs;
       var compiler;
