@@ -1,0 +1,43 @@
+{
+  "name": "docpack-markdown-extractor",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/plugin.js",
+  "scripts": {
+    "test": "mocha test/*.test.js",
+    "coverage": "istanbul cover --report text --report html --report lcov node_modules/mocha/bin/_mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kisenka/docpack-markdown-extractor.git"
+  },
+  "author": "kisenka <qtuzov@gmail.com> (https://github.com/kisenka)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kisenka/docpack-markdown-extractor/issues"
+  },
+  "homepage": "https://github.com/kisenka/docpack-markdown-extractor#readme",
+  "files": [
+    "lib/",
+    "README.md"
+  ],
+  "dependencies": {
+    "bluebird": "^3.4.0",
+    "docpack": "^1.0.0-beta.1",
+    "front-matter": "^2.1.0",
+    "glob": "^7.1.1",
+    "null-loader": "^0.1.1",
+    "object-assign": "^4.1.0",
+    "remarkable": "^1.7.1",
+    "webpack-toolkit": "^0.7.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.5",
+    "sinon-chai": "^2.8.0",
+    "webpack": "^1.13.2"
+  }
+}
