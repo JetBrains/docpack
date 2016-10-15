@@ -1,20 +1,31 @@
-var docpack = require('docpack');
+var Docpack = require('docpack');
 var createContext = require('docpack/lib/utils/createExtractorContext');
-var extractor = require('./extractor');
-var findModule = require('webpack-toolkit').getModuleByFilepath;
 var Promise = require('bluebird');
+var tools = require('webpack-toolkit');
+var extractor = require('./extractor');
 
-module.exports = docpack.createPlugin({
+var defaultConfig = {
+  match: /\.js$/,
+  parseMarkdown: true
+};
+
+var JSDocExtractor = Docpack.createPlugin({
   name: 'jsdoc-extractor',
+  defaultConfig: defaultConfig,
   apply: function (compiler) {
+    var config = this.config;
+    var doxConfig = {raw: !config.parseMarkdown};
 
     compiler.plugin('compilation', function (compilation) {
-      compilation.plugin(docpack.HOOKS.EXTRACT, function (sources, done) {
+      compilation.plugin(Docpack.HOOKS.EXTRACT, function (sources, done) {
+        var targets = sources.filter(function(source) {
+          return tools.matcher(config.match, source.absolutePath);
+        });
 
-        var promises = Promise.map(sources, function (source) {
-          var module = findModule(compilation, source.absolutePath);
+        var promises = Promise.map(targets, function (source) {
+          var module = tools.getModuleByFilepath(compilation, source.absolutePath);
           var context = createContext(compiler.inputFileSystem, module);
-          return extractor.call(context, source);
+          return extractor.call(context, source, doxConfig);
         });
 
         Promise.all(promises).then(function (sources) {
@@ -22,6 +33,8 @@ module.exports = docpack.createPlugin({
         });
       });
     });
-
   }
 });
+
+module.exports = JSDocExtractor;
+module.exports.defaultConfig = defaultConfig;
