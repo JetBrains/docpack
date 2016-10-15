@@ -91,9 +91,9 @@ describe('Extractor', () => {
     extract(source)
       .then(source => {
         var attrs = source.blocks[0].attrs;
-        attrs.should.have.property('type').and.eql('{Object} foo');
-        attrs.should.have.property('qwe1').and.eql('qwe1');
-        attrs.should.have.property('qwe2').and.eql('qwe2');
+        attrs.should.have.property('type').and.equal('{Object} foo');
+        attrs.should.have.property('qwe1').and.equal('qwe1 *qwe*');
+        attrs.should.have.property('qwe2').and.equal('qwe2');
         done();
       })
       .catch(done);
