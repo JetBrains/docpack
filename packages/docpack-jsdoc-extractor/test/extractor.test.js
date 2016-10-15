@@ -67,11 +67,14 @@ describe('Extractor', () => {
       .catch(done);
   });
 
-  it('should process markdown in comment text', (done) => {
+  it('should process markdown in comment text tag by default and should not if `raw=true`', (done) => {
     source.content = '/** qwe *qwe* qwe */';
+
     extract(source)
-      .then(source => {
-        source.blocks[0].description.should.contain(' <em>qwe</em> ');
+      .then(() => source.blocks[0].description.should.contain(' <em>qwe</em> '))
+      .then(() => extract(source, {raw: true}))
+      .then(() => {
+        source.blocks[0].description.should.be.equal('qwe *qwe* qwe');
         done();
       })
       .catch(done);
@@ -81,7 +84,7 @@ describe('Extractor', () => {
     source.content = `
       /**
        * @type {Object} foo
-       * @qwe1 qwe1
+       * @qwe1 qwe1 *qwe*
        * @qwe2 qwe2
        */`;
 
@@ -98,17 +101,13 @@ describe('Extractor', () => {
 
   describe('Tags special handling', () => {
     describe('@description', () => {
-      it('should process markdown', (done) => {
-        source.content = `
-          /**
-           * @description qwe *qwe* ***
-           */
-        `;
+      it('should process markdown by default and should not if `raw=true`', (done) => {
+        source.content = '/** @description qwe *qwe* */';
         extract(source)
-          .then(source => {
-            source.blocks[0].attrs.description.should.contain(' <em>qwe</em> ');
-            done();
-          })
+          .then(() => source.blocks[0].attrs.description.should.contain('<em>qwe</em>'))
+          .then(() => extract(source, {raw: true}))
+          .then(() => source.blocks[0].attrs.description.should.be.equal('qwe *qwe*'))
+          .then(() => done())
           .catch(done);
       });
     });

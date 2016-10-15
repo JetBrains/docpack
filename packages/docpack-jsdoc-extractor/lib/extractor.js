@@ -9,9 +9,11 @@ var parseXMLExample = require('./parseXMLExamples');
 
 /**
  * @param {Source} source
+ * @param {Object} options
  * @returns {Promise<Source>}
  */
-module.exports = function extract(source) {
+module.exports = function extract(source, options) {
+  var opts = options || {};
   var extractor = this;
   var content = source.content;
   var isEmpty = content.trim() == '';
@@ -21,13 +23,17 @@ module.exports = function extract(source) {
   }
 
   try {
-    var comments = parseComments(content);
+    var comments = parseComments(content, opts);
   } catch (e) {
     var error = new Error(format('Invalid JSDoc in %s\n%s', source.path, e.toString()));
     return Promise.reject(error);
   }
 
   var promises = [];
+
+  if (comments.length > 0) {
+    source.blocks = [];
+  }
 
   comments.forEach(function (comment, commentIndex) {
     var isFirstComment = commentIndex == 0;
@@ -43,18 +49,18 @@ module.exports = function extract(source) {
       var tagName = tag.type;
       var tagContent = tag.string;
 
+      // Every tag from first comment goes to source attributes
+      if (isFirstComment) {
+        source.attrs[tagName] = tagContent;
+      }
+
       switch (tagName) {
         default:
           codeBlock.attrs[tagName] = tagContent;
-
-          // Every tag from first comment goes to source attributes
-          if (isFirstComment) {
-            source.attrs[tagName] = tagContent;
-          }
           break;
 
         case 'description':
-          codeBlock.attrs.description = tag.html;
+          codeBlock.attrs.description = opts.raw ? tag.full : tag.html;
           break;
 
         case 'example':
