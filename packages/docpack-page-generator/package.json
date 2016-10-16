@@ -1,6 +1,6 @@
 {
   "name": "docpack-page-generator",
-  "version": "0.0.1",
+  "version": "0.0.1-beta.1",
   "description": "",
   "main": "lib/plugin.js",
   "scripts": {
