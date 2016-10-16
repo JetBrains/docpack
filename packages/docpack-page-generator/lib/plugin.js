@@ -8,6 +8,7 @@ var isPlainObject = require('is-plain-object');
 
 var defaultConfig = {
   match: null,
+  select: null,
   template: null,
   url: '[path][name].[ext].html',
   context: {},
@@ -126,15 +127,15 @@ PageGeneratorPlugin.prototype.select = function(sources) {
   var targets = sources;
 
   if (config.match) {
-    if (typeof config.match == 'function') {
-      targets = config.match(sources);
-      if (!Array.isArray(targets)) {
-        throw new Error('`match` should return array of objects');
-      }
-    } else {
-      targets = sources.filter(function (source) {
-        return tools.matcher(config.match, source.absolutePath);
-      });
+    targets = sources.filter(function (source) {
+      return tools.matcher(config.match, source.absolutePath);
+    });
+  }
+
+  if (typeof config.select == 'function') {
+    targets = config.select(sources);
+    if (!Array.isArray(targets)) {
+      throw new Error('`select` should return an array');
     }
   }
 

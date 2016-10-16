@@ -133,31 +133,31 @@ describe('Docpack Page Generator Plugin', () => {
       compilation = tools.createCompilation();
     });
 
-    it('should allow use function as `match` option value', () => {
-      var match = sinon.spy(function(sources) {
+    it('should allow use regexp as `match` option value', () => {
+      plugin.config.match = /2/;
+      var result = plugin.select(sources);
+      result.should.be.an('array');
+      result[0].should.be.equal(sources[1]);
+    });
+
+    it('should allow use function as `select` option value', () => {
+      var select = sinon.spy(function(sources) {
         return sources.filter(source => source.path == '2');
       });
 
-      plugin.config.match = match;
+      plugin.config.select = select;
 
       plugin.select(sources)
         .should.be.an('array')
         .and.have.lengthOf(1)
         .and.eql([sources[1]]);
 
-      match.firstCall.args[0].should.equal(sources);
+      select.firstCall.args[0].should.equal(sources);
     });
 
-    it('should throw if non-array returned from `match` function', () => {
-      plugin.config.match = (sources => sources[0]);
+    it('should throw if non-array returned from `select` function', () => {
+      plugin.config.select = (sources => sources[0]);
       (() => plugin.select(compilation, sources)).should.throw();
-    });
-
-    it('should allow use regexp as `match` option value', () => {
-      plugin.config.match = /2/;
-      var result = plugin.select(sources);
-      result.should.be.an('array');
-      result[0].should.be.equal(sources[1]);
     });
   });
 
