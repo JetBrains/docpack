@@ -38,7 +38,7 @@
     "webpack": "^1.13.2"
   },
   "dependencies": {
-    "docpack": "^1.7.3-alpha",
+    "docpack": "beta",
     "dotty": "0.0.2",
     "loader-utils": "^0.2.16",
     "merge-options": "0.0.64",
