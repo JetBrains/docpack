@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DevServer" type="NodeJSConfigurationType" factoryName="Node.js" path-to-node="$NODE_LOCATION$" path-to-js-file="node_modules/webpack-dev-server/bin/webpack-dev-server.js" application-parameters="--config test/fixtures/plugin/webpack.config.js" working-dir="$PROJECT_DIR$">
-    <profiling v8-profiler-path="" />
-    <EXTENSION ID="com.jetbrains.nodejs.run.NodeJSProfilingRunConfigurationExtension">
-      <profiling v8-profiler-path="" />
-    </EXTENSION>
-    <method />
-  </configuration>
-</component>
