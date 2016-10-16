@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "bluebird": "^3.4.0",
-    "docpack": "^1.7.3-alpha",
+    "docpack": "beta",
     "is-plain-object": "^2.0.1",
     "twig-loader": "^0.2.3",
     "url-slug": "^2.0.0",
