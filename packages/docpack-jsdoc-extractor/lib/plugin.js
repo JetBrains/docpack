@@ -28,7 +28,7 @@ var JSDocExtractor = Docpack.createPlugin({
           return extractor.call(context, source, doxConfig);
         });
 
-        Promise.all(promises).then(function (sources) {
+        Promise.all(promises).then(function() {
           done(null, sources);
         });
       });
