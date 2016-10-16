@@ -97,8 +97,9 @@ describe('docpack-markdown-extractor', () => {
       createCompiler(plugin).run()
         .then(compilation => {
           var sources = getDocpackSources(compilation);
-          sources.should.be.lengthOf(1);
-          sources[0].path.should.contain('test1.md');
+          sources.should.be.lengthOf(2);
+          sources[0].attrs.should.have.property('title').and.be.equal('qwe');
+          sources[1].attrs.should.be.empty;
           done();
         })
         .catch(done);

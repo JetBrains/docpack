@@ -77,7 +77,7 @@ MarkdownExtractor.prototype.apply = function(compiler) {
         return extractor(source, config.markdownOptions);
       });
 
-      Promise.all(promises).then(function(sources) {
+      Promise.all(promises).then(function() {
         done(null, sources);
       });
     });
