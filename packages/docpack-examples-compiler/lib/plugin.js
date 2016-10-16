@@ -5,6 +5,8 @@ var tools = require('webpack-toolkit');
 var Asset = require('docpack/lib/data/Asset');
 
 var defaultConfig = {
+  match: null,
+
   /**
    * Used for loaders matching, can be overridden via ExampleFile attrs.filename
    */
@@ -29,7 +31,14 @@ var ExamplesCompilerPlugin = docpack.createPlugin({
           filename: config.filename,
           outputFilename: config.outputFilename
         });
-        var filesByPaths = getExampleFilesByPath(sources);
+
+        var targets = config.match === null
+          ? sources
+          : sources.filter(function(source) {
+              return tools.matcher(config.match, source.absolutePath);
+            });
+
+        var filesByPaths = getExampleFilesByPath(targets);
 
         for (var sourcePath in filesByPaths) {
           filesByPaths[sourcePath].forEach(function(file) {
