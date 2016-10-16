@@ -123,7 +123,7 @@ describe('Extractor', () => {
 
         extract(source)
           .then(source => {
-            var example = source.blocks[0].examples[0];
+            var example = source.getExamples()[0];
             example.should.exist.and.be.instanceOf(Example);
             example.files.should.be.empty;
             done();
@@ -142,8 +142,7 @@ describe('Extractor', () => {
 
         extract(source)
           .then(source => {
-            var examples = source.blocks[0].examples;
-            examples.should.be.lengthOf(3);
+            source.getExamples().should.be.lengthOf(3);
             done();
           })
           .catch(done);
@@ -158,7 +157,7 @@ describe('Extractor', () => {
 
         extract(source)
           .then(source => {
-            var example = source.blocks[0].examples[0];
+            var example = source.getExamples()[0];
             example.should.exist.and.be.instanceOf(Example);
             example.files.should.be.lengthOf(1);
             done();
@@ -228,7 +227,7 @@ describe('Extractor', () => {
         writeFile(resolve('/examples.html'), '<example><file></file></example>');
 
         mocked(source).then(source => {
-          var example = source.blocks[0].examples[0];
+          var example = source.getExamples()[0];
           example.should.exist;
           example.files.should.exist.and.be.lengthOf(1);
           done();
@@ -259,7 +258,7 @@ describe('Extractor', () => {
 
         mocked(source)
           .then(source => {
-            var examples = source.blocks[0].examples;
+            var examples = source.getExamples();
             var names = examples.map((example) => { return example.attrs.name });
 
             examples.should.have.lengthOf(expectedOrder.length);
