@@ -60,10 +60,11 @@ PageGeneratorPlugin.prototype.configure = function(compiler) {
   var config = this.config;
   var tpl = config.template;
   var tplExt = path.extname(tpl);
+  var tplAbsPath = path.resolve(tpl);
 
   var resolveExtensions = compiler.options.resolve.extensions;
   var moduleOptions = compiler.options.module;
-  var hasLoadersToProcessTemplate = resolveExtensions.indexOf(tplExt) >= 0 || tools.getMatchedLoaders(moduleOptions, tpl).length > 0;
+  var hasLoadersToProcessTemplate = resolveExtensions.indexOf(tplExt) >= 0 || tools.getMatchedLoaders(moduleOptions, tplAbsPath).length > 0;
 
   if (!Array.isArray(moduleOptions.loaders)) {
     moduleOptions.loaders = [];
