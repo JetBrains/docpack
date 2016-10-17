@@ -23,11 +23,14 @@ describe('xmlExampleParser', () => {
   describe('<example>', () => {
     it('should NOT skip empty <example> tags', () => {
       var input = '<example></example>';
-      parse(input).should.be.instanceOf(Example);
+      var example = parse(input);
+      example.should.be.instanceOf(Example);
+      example.should.have.a.property('content').and.equal('');
     });
 
     it('should copy all <example> tag attributes to Example attrs', () => {
       var example = parse('<example attr1="value1" attr2="true" foo="false"></example>');
+      example.should.have.a.property('content').and.equal('');
       example.attrs.should.be.deep.equal({
         attr1: 'value1', attr2: 'true', foo: 'false'
       })
@@ -37,6 +40,7 @@ describe('xmlExampleParser', () => {
   describe('<file>', () => {
     it('should NOT skip empty <file> tags', () => {
       var example = parse('<example><file></file></example>');
+      example.should.have.a.property('content').and.equal('<file></file>');
       example.files.should.be.a('array').and.be.lengthOf(1);
       example.files[0].should.be.instanceOf(ExampleFile);
     });
