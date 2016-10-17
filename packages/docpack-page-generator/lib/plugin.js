@@ -192,7 +192,7 @@ PageGeneratorPlugin.prototype.render = function(compilation, target, targets) {
 
   var context;
   if (typeof config.context == 'function') {
-    context = merge(defaultContext, config.context(targets));
+    context = merge(defaultContext, config.context(targets, target));
     if (!isPlainObject(context)) {
       throw new Error('`context` function should return an object');
     }
