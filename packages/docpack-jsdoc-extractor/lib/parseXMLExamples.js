@@ -1,86 +1,96 @@
-var path = require('path');
-var sax = require('sax');
-var stripIndent = require('strip-indent');
+const path = require('path');
+const sax = require('sax');
+const stripIndent = require('strip-indent');
 
-var Example = require('docpack/lib/data/Example');
-var ExampleFile = require('docpack/lib/data/ExampleFile');
+const Example = require('docpack/lib/data/Example');
+const ExampleFile = require('docpack/lib/data/ExampleFile');
 
-var FILE_TAG = 'file';
-var EXAMPLE_TAG = 'example';
-var PARSER_STRICT_MODE = false;
-var PARSER_OPTIONS = {lowercase: true};
-var TAG_START_REGEXP = /(?:<\s*\/\s*file)(?![\s\S]*<\s*\/\s*file)/;
+const FILE_TAG = 'file';
+const EXAMPLE_TAG = 'example';
+const PARSER_STRICT_MODE = false;
+const PARSER_OPTIONS = {lowercase: true};
+const TAG_START_REGEXP = /(?:<\s*\/\s*file)(?![\s\S]*<\s*\/\s*file)/;
+const EXAMPLE_START_REGEXP = /(?:<\s*\/\s*example)(?![\s\S]*<\s*\/\s*example)/;
 
 /**
  * @param {string} content
  * @returns {Array<Example>|null}
  */
 module.exports = function (content) {
-  var hasXMLExamples = content.indexOf('<example') > -1;
+  const hasXMLExamples = content.indexOf('<example') > -1;
   if (!hasXMLExamples) {
     return [];
   }
 
-  var examples = [];
-  var wrappedContent = '<root>' + content + '</root>';
-  var currentExample = null;
-  var currentFile = null;
-  var fileContentStartPosition = null;
-  
-  var parser = sax.parser(PARSER_STRICT_MODE, PARSER_OPTIONS);
-    
+  const examples = [];
+  const wrappedContent = '<root>' + content + '</root>';
+
+  let files = [];
+  let fileNode = null;
+  let exampleNode = null;
+  let fileContentStartPosition = null;
+  let exampleContentStartPosition = null;
+
+  const parser = sax.parser(PARSER_STRICT_MODE, PARSER_OPTIONS);
+
   function stopFileParsing() {
-    currentFile = null;
+    fileNode = null;
     fileContentStartPosition = null;
   }
-  
-  function getFileTagStartPosition(currentPosition) {
-    var previousContent = wrappedContent.substring(0, currentPosition);
-    var match = previousContent.match(TAG_START_REGEXP);
-    
-    return match && match.index;
+
+  function stopExampleParsing() {
+    files = [];
+    exampleNode = null;
+    exampleContentStartPosition = null;
   }
-  
+
+  function getTagContent(startPosition, currentPosition, regexp) {
+    const previousContent = wrappedContent.substring(0, currentPosition);
+    const match = previousContent.match(regexp);
+    const endPosition = match && match.index;
+
+    return endPosition && wrappedContent.substring(startPosition, endPosition) || '';
+  }
+
   parser.onopentag = function (node) {
-    if (node.name === EXAMPLE_TAG && !currentExample) {
-      currentExample = new Example({
-        content: null,
-        attrs: node.attributes,
-        files: []
-      });
-      examples.push(currentExample);
+    if (node.name === EXAMPLE_TAG && !exampleNode) {
+      exampleNode = node;
+      exampleContentStartPosition = parser.position;
     }
 
     // Don't go deeper than one level
-    if (node.name === FILE_TAG && currentExample && !currentFile) {
-      currentFile = new ExampleFile({
-        type: null,
-        content: null,
-        attrs: node.attributes
-      });
+    if (node.name === FILE_TAG && exampleNode && !fileNode) {
+      fileNode = node;
       fileContentStartPosition = parser.position;
     }
   };
-  
+
   parser.onclosetag = function (nodeName) {
-    if (nodeName === EXAMPLE_TAG && currentExample) {
-      currentExample = null;
+    if (nodeName === EXAMPLE_TAG && exampleNode) {
+      const content = getTagContent(exampleContentStartPosition, parser.position, EXAMPLE_START_REGEXP);
+      examples.push(new Example({
+        content: stripIndent(content),
+        attrs: exampleNode.attributes,
+        files
+      }));
+
       stopFileParsing();
+      stopExampleParsing();
     }
 
-    if (nodeName === FILE_TAG && currentExample && currentFile) {
-      var fileContentEndPosition = getFileTagStartPosition(parser.position);
-      if (!fileContentEndPosition) {
+    if (nodeName === FILE_TAG && exampleNode && fileNode) {
+      const content = getTagContent(fileContentStartPosition, parser.position, TAG_START_REGEXP);
+
+      if (content == null) {
         stopFileParsing();
         return;
       }
 
-      var fileContent = wrappedContent.substring(fileContentStartPosition, fileContentEndPosition);
-
-      currentFile.type =  currentFile.attrs.type || 'js';
-      currentFile.content = stripIndent(fileContent);
-
-      currentExample.files.push(currentFile);
+      files.push(new ExampleFile({
+        type: fileNode.attributes.type || 'js',
+        content: stripIndent(content),
+        attrs: fileNode.attributes
+      }));
 
       stopFileParsing();
     }
