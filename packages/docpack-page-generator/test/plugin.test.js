@@ -83,7 +83,8 @@ describe('Docpack Page Generator Plugin', () => {
 
       compiler.options.module.loaders[0].should.be.eql({
         test: /\.zzz$/,
-        loader: require.resolve(Plugin.CONST.FALLBACK_LOADER_NAME)
+        loader: require.resolve(Plugin.CONST.FALLBACK_LOADER_NAME),
+        include: path.dirname(path.resolve('./template.zzz'))
       });
     });
   });

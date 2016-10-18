@@ -78,7 +78,8 @@ PageGeneratorPlugin.prototype.configure = function(compiler) {
     // If no loaders to process the template - add fallback loader to config
     moduleOptions.loaders.push({
       test: new RegExp('\\.' + tplExt.substr(1) + '$'),
-      loader: require.resolve(CONST.FALLBACK_LOADER_NAME)
+      loader: require.resolve(CONST.FALLBACK_LOADER_NAME),
+      include: path.dirname(tplAbsPath)
     });
   }
 };
