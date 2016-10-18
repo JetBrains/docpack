@@ -14,11 +14,11 @@ var JSDocExtractor = Docpack.createPlugin({
   defaultConfig: defaultConfig,
   apply: function (compiler) {
     var config = this.config;
-    var doxConfig = {raw: !config.parseMarkdown};
+    var doxConfig = { raw: !config.parseMarkdown };
 
     compiler.plugin('compilation', function (compilation) {
       compilation.plugin(Docpack.HOOKS.EXTRACT, function (sources, done) {
-        var targets = sources.filter(function(source) {
+        var targets = sources.filter(function (source) {
           return tools.matcher(config.match, source.absolutePath);
         });
 
@@ -28,7 +28,7 @@ var JSDocExtractor = Docpack.createPlugin({
           return extractor.call(context, source, doxConfig);
         });
 
-        Promise.all(promises).then(function() {
+        Promise.all(promises).then(function () {
           done(null, sources);
         });
       });

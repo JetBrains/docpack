@@ -1,35 +1,36 @@
-var path = require('path');
-var resolve = path.resolve;
-var extract = require('../lib/extractor');
-var Source = require('docpack/lib/data/Source');
-var Example = require('docpack/lib/data/Example');
+const path = require('path');
+const Promise = require('bluebird');
+const MemoryFS = require('memory-fs');
 
-var Promise = require('bluebird');
+const readFile = require('webpack-toolkit/lib/readFile');
 
-var MemoryFS = require('memory-fs');
-var readFile = require('webpack-toolkit/lib/readFile');
+const extract = require('../lib/extractor');
+const Source = require('docpack/lib/data/Source');
+const Example = require('docpack/lib/data/Example');
+
+const resolve = path.resolve;
 
 function mockExtractor(fs) {
-  var context = {
-    fs: fs,
+  const context = {
+    fs,
     dependencies: [],
-    addDependency: function(dep) {
+    addDependency(dep) {
       this.dependencies.push(dep);
     },
-    readFile: readFile.bind(null, fs)
+    readFile: readFile.bind(null, fs),
   };
 
   return extract.bind(context);
 }
 
 describe('Extractor', () => {
-  var source;
+  let source;
 
   beforeEach(() => {
     source = new Source({
       path: 'source.js',
       absolutePath: '/source.js',
-      content: ''
+      content: '',
     });
   });
 
@@ -43,7 +44,7 @@ describe('Extractor', () => {
   });
 
   it('should reject when invalid jsdoc', () => {
-    source.content = `/** @type {{{ */ var a = 123;`;
+    source.content = '/** @type {{{ */ var a = 123;';
     return extract(source).should.be.rejected;
   });
 
@@ -57,11 +58,11 @@ describe('Extractor', () => {
     `;
 
     extract(source)
-      .then(source => {
-        source.attrs.module.should.eql('tralala');
-        source.blocks.should.have.lengthOf(2);
-        source.blocks[0].attrs.module.should.eql('tralala');
-        source.blocks[1].attrs.name.should.eql('qwe');
+      .then((sourceResult) => {
+        sourceResult.attrs.module.should.eql('tralala');
+        sourceResult.blocks.should.have.lengthOf(2);
+        sourceResult.blocks[0].attrs.module.should.eql('tralala');
+        sourceResult.blocks[1].attrs.name.should.eql('qwe');
         done();
       })
       .catch(done);
@@ -72,7 +73,7 @@ describe('Extractor', () => {
 
     extract(source)
       .then(() => source.blocks[0].description.should.contain(' <em>qwe</em> '))
-      .then(() => extract(source, {raw: true}))
+      .then(() => extract(source, { raw: true }))
       .then(() => {
         source.blocks[0].description.should.be.equal('qwe *qwe* qwe');
         done();
@@ -89,8 +90,8 @@ describe('Extractor', () => {
        */`;
 
     extract(source)
-      .then(source => {
-        var attrs = source.blocks[0].attrs;
+      .then((sourceResult) => {
+        const attrs = sourceResult.blocks[0].attrs;
         attrs.should.have.property('type').and.equal('{Object} foo');
         attrs.should.have.property('qwe1').and.equal('qwe1 *qwe*');
         attrs.should.have.property('qwe2').and.equal('qwe2');
@@ -105,7 +106,7 @@ describe('Extractor', () => {
         source.content = '/** @description qwe *qwe* */';
         extract(source)
           .then(() => source.blocks[0].attrs.description.should.contain('<em>qwe</em>'))
-          .then(() => extract(source, {raw: true}))
+          .then(() => extract(source, { raw: true }))
           .then(() => source.blocks[0].attrs.description.should.be.equal('qwe *qwe*'))
           .then(() => done())
           .catch(done);
@@ -122,8 +123,8 @@ describe('Extractor', () => {
         `;
 
         extract(source)
-          .then(source => {
-            var example = source.getExamples()[0];
+          .then((sourceResult) => {
+            const example = sourceResult.getExamples()[0];
             example.should.exist.and.be.instanceOf(Example);
             example.files.should.be.empty;
             done();
@@ -141,8 +142,8 @@ describe('Extractor', () => {
         `;
 
         extract(source)
-          .then(source => {
-            source.getExamples().should.be.lengthOf(3);
+          .then((sourceResult) => {
+            sourceResult.getExamples().should.be.lengthOf(3);
             done();
           })
           .catch(done);
@@ -156,8 +157,8 @@ describe('Extractor', () => {
         `;
 
         extract(source)
-          .then(source => {
-            var example = source.getExamples()[0];
+          .then((sourceResult) => {
+            const example = sourceResult.getExamples()[0];
             example.should.exist.and.be.instanceOf(Example);
             example.files.should.be.lengthOf(1);
             done();
@@ -167,17 +168,17 @@ describe('Extractor', () => {
     });
 
     describe('@example-file', () => {
-      var fs;
-      var mocked;
-      var writeFile;
+      let fs;
+      let mocked;
+      let writeFile;
 
       beforeEach(() => {
         fs = new MemoryFS();
-        writeFile = function(filepath, content) {
-          var dir = path.dirname(filepath);
+        writeFile = function (filepath, content) {
+          const dir = path.dirname(filepath);
           try {
             fs.statSync(dir).isDirectory();
-          } catch(e) {
+          } catch (e) {
             fs.mkdirpSync(dir);
           }
           fs.writeFileSync(filepath, content || '', 'utf-8');
@@ -193,7 +194,7 @@ describe('Extractor', () => {
         });
 
         it('should resolve file properly', () => {
-          var promises = [];
+          const promises = [];
 
           writeFile(resolve('/examples.html'));
 
@@ -213,7 +214,7 @@ describe('Extractor', () => {
           source = new Source({
             path: 'dir/source.js',
             absolutePath: '/dir/source.js',
-            content: '/** @example-file ../dir2/examples.html */'
+            content: '/** @example-file ../dir2/examples.html */',
           });
 
           writeFile(resolve('/dir2/examples.html'));
@@ -226,8 +227,8 @@ describe('Extractor', () => {
         source.content = '/** @example-file examples.html */';
         writeFile(resolve('/examples.html'), '<example><file></file></example>');
 
-        mocked(source).then(source => {
-          var example = source.getExamples()[0];
+        mocked(source).then((sourceResult) => {
+          const example = sourceResult.getExamples()[0];
           example.should.exist;
           example.files.should.exist.and.be.lengthOf(1);
           done();
@@ -236,7 +237,7 @@ describe('Extractor', () => {
       });
 
       it('should assign examples in right order', (done) => {
-        var input = `
+        const input = `
           /**
            * @example-file example1.html
            * @example-file example2.html
@@ -244,10 +245,10 @@ describe('Extractor', () => {
            */
         `;
 
-        var expectedOrder = [
+        const expectedOrder = [
           'example1.html',
           'example2.html',
-          'example3.html'
+          'example3.html',
         ];
 
         source.content = input;
@@ -257,9 +258,9 @@ describe('Extractor', () => {
         });
 
         mocked(source)
-          .then(source => {
-            var examples = source.getExamples();
-            var names = examples.map((example) => { return example.attrs.name });
+          .then((sourceResult) => {
+            const examples = sourceResult.getExamples();
+            const names = examples.map(example => example.attrs.name);
 
             examples.should.have.lengthOf(expectedOrder.length);
             names.forEach((filename, i) => {
