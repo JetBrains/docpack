@@ -9,15 +9,15 @@ const FILE_TAG = 'file';
 const EXAMPLE_TAG = 'example';
 const PARSER_STRICT_MODE = false;
 const PARSER_OPTIONS = {lowercase: true};
-const TAG_START_REGEXP = /(?:<\s*\/\s*file)(?![\s\S]*<\s*\/\s*file)/;
-const EXAMPLE_START_REGEXP = /(?:<\s*\/\s*example)(?![\s\S]*<\s*\/\s*example)/;
+const TAG_START_REGEXP = /(?:<\s*\/\s*file\s*>)(?![\s\S]*<\s*\/\s*file\s*>)/;
+const EXAMPLE_START_REGEXP = /(?:<\s*\/\s*example\s*>)(?![\s\S]*<\s*\/\s*example\s*>)/;
 
 /**
  * @param {string} content
  * @returns {Array<Example>|null}
  */
 module.exports = function (content) {
-  const hasXMLExamples = content.indexOf('<example') > -1;
+  const hasXMLExamples = content.match(EXAMPLE_START_REGEXP);
   if (!hasXMLExamples) {
     return [];
   }

@@ -76,9 +76,9 @@ module.exports = function extract(source, options) {
           var filepath = path.resolve( path.dirname(source.absolutePath), tagContent );
 
           var promise = extractor.readFile(filepath)
-            .then(function (content) {
+            .then(function (buffer) {
               extractor.addDependency(filepath);
-              codeBlock.examples.push(parseXMLExample(content));
+              codeBlock.examples.push(parseXMLExample(buffer.toString()));
             })
             .catch(function(err) {
               var error = err;

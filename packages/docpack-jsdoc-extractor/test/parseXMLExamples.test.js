@@ -15,8 +15,15 @@ describe('xmlExampleParser', () => {
   it('should return empty array if no examples found', () => {
     var input = ['\n', '\n', '   ', '\n', '  \n'].join('');
     examplesParser(input).should.be.a('array').and.be.empty;
+  });
 
+  it('should return empty array if only <file>s found', () => {
     input = 'var a = 123; <file></file>';
+    examplesParser(input).should.be.a('array').and.be.empty;
+  });
+
+  it('should return empty array if incorrect <example> tags found', () => {
+    input = 'var a = 123; <example></example';
     examplesParser(input).should.be.a('array').and.be.empty;
   });
 
