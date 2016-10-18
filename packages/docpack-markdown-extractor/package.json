@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "bluebird": "^3.4.0",
-    "docpack": "beta",
+    "docpack": "^1.0.0",
     "front-matter": "^2.1.0",
     "glob": "^7.1.1",
     "null-loader": "^0.1.1",
