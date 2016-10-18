@@ -38,9 +38,9 @@
     "webpack": "^1.13.2"
   },
   "dependencies": {
-    "docpack": "beta",
+    "docpack": "^1.0.0",
     "dotty": "0.0.2",
-    "loader-utils": "^0.2.16",
+    "loader-utils": "^0.2.0",
     "merge-options": "0.0.64",
     "webpack-toolkit": "^0.7.0"
   }
