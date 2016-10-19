@@ -22,7 +22,7 @@ var mockSourceWithFiles = function(absPath, files) {
   ]});
 };
 
-var createCompilerWithExampleFiles = function(files) {
+var createCompilerWithExampleFiles = function(files, pluginOptions) {
   var compiler = tools.InMemoryCompiler({
     context: fixturesPath,
     plugins: [
@@ -31,7 +31,7 @@ var createCompilerWithExampleFiles = function(files) {
           var source = mockSourceWithFiles(entryPath, files);
           done(null, [source]);
         })
-        .use(ExamplesCompilerPlugin())
+        .use(ExamplesCompilerPlugin(pluginOptions))
     ]
   });
 
@@ -56,6 +56,30 @@ describe('docpack-example-compiler', () => {
         asset.should.have.property('type').that.equal('js');
 
         compilation.assets.should.have.property(asset.path);
+
+        asset
+          .should.have.property('content').that.equal(compilation.assets[asset.path].source())
+          .and.that.includes('console.log(123)');
+
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should filter examples via `filter` config param', (done) => {
+    var files = [
+      new ExampleFile({type: 'js', content: 'console.log(123)', attrs: {compile: true}}),
+      new ExampleFile({type: 'foo', content: '<<>>'})
+    ];
+
+    createCompilerWithExampleFiles(files, {filter: (example => example.attrs.compile)})
+      .run()
+      .then(compilation => {
+        var file = files[0];
+        var asset = file.assets[0];
+
+        file.assets.should.be.lengthOf(1);
+        Object.keys(compilation.assets).should.be.lengthOf(1);
 
         asset
           .should.have.property('content').that.equal(compilation.assets[asset.path].source())

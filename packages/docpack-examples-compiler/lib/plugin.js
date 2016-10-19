@@ -6,6 +6,7 @@ var Asset = require('docpack/lib/data/Asset');
 
 var defaultConfig = {
   match: null,
+  filter: null,
 
   /**
    * Used for loaders matching, can be overridden via ExampleFile attrs.filename
@@ -32,6 +33,8 @@ var ExamplesCompilerPlugin = docpack.createPlugin({
           outputFilename: config.outputFilename
         });
 
+        var hasFilter = typeof config.filter == 'function';
+
         var targets = config.match === null
           ? sources
           : sources.filter(function(source) {
@@ -42,6 +45,10 @@ var ExamplesCompilerPlugin = docpack.createPlugin({
 
         for (var sourcePath in filesByPaths) {
           filesByPaths[sourcePath].forEach(function(file) {
+            if (hasFilter && !config.filter(file)) {
+              return;
+            }
+
             file.chunkName = compiler.getOutputFilename(file, sourcePath);
             compiler.addFile(file, sourcePath);
           });
