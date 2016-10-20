@@ -37,7 +37,8 @@
     "shuffle-array": "^1.0.0",
     "sinon": "1.17.4",
     "sinon-chai": "2.8.0",
-    "webpack": "^1.12.10"
+    "webpack": "^1.12.10",
+    "lerna": "2.0.0-beta.30"
   },
   "dependencies": {
     "bluebird": "^3.4.0",
