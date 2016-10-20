@@ -2,40 +2,16 @@
   "name": "docpack-page-generator",
   "version": "0.0.2",
   "description": "",
-  "main": "lib/plugin.js",
-  "scripts": {
-    "test": "mocha test/*.test.js test/**/*.test.js",
-    "coverage": "istanbul cover --report text --report html --report lcov node_modules/mocha/bin/_mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kisenka/docpack-page-generator.git"
-  },
   "author": "kisenka <qtuzov@gmail.com> (https://github.com/kisenka)",
+  "homepage": "https://github.com/kisenka/docpack",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/kisenka/docpack-page-generator/issues"
-  },
-  "homepage": "https://github.com/kisenka/docpack-page-generator#readme",
-  "files": [
-    "lib/",
-    "README.md"
-  ],
+  "repository": "https://github.com/kisenka/docpack/tree/master/packages/docpack-page-generator",
+  "main": "lib/plugin.js",
   "dependencies": {
-    "bluebird": "^3.4.0",
     "docpack": "^1.0.0",
     "is-plain-object": "^2.0.1",
     "twig-loader": "^0.2.3",
     "url-slug": "^2.0.0",
     "webpack-toolkit": "^0.7.0"
-  },
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "chai-as-promised": "^5.3.0",
-    "istanbul": "^0.4.5",
-    "mocha": "^3.0.2",
-    "sinon": "^1.17.5",
-    "sinon-chai": "^2.8.0",
-    "webpack": "^1.13.2"
   }
 }
