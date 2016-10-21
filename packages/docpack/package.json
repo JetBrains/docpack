@@ -1,0 +1,20 @@
+{
+  "name": "docpack",
+  "version": "1.0.0",
+  "description": "Webpack plugin to extract and generate documentation from your sources",
+  "author": "kisenka <qtuzov@gmail.com> (https://github.com/kisenka)",
+  "homepage": "https://github.com/kisenka/docpack",
+  "license": "MIT",
+  "repository": "https://github.com/kisenka/docpack",
+  "main": "lib/docpack.js",
+  "dependencies": {
+    "bluebird": "^3.4.0",
+    "docpack": "^1.0.0",
+    "front-matter": "^2.1.0",
+    "glob": "^7.1.1",
+    "null-loader": "^0.1.1",
+    "object-assign": "^4.1.0",
+    "remarkable": "^1.7.1",
+    "webpack-toolkit": "^0.7.0"
+  }
+}

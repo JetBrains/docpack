@@ -5,11 +5,11 @@ var tools = require('webpack-toolkit');
 var InMemoryCompiler = require('webpack-toolkit/lib/InMemoryCompiler');
 var MemoryFS = require('memory-fs');
 
-var Docpack = require('../lib/docpack');
+var Docpack = require('./docpack');
 var HOOKS = Docpack.HOOKS;
-var DocpackPlugin = require('../lib/utils/DocpackPlugin');
+var DocpackPlugin = require('./utils/DocpackPlugin');
 var createPlugin = DocpackPlugin.create;
-var Source = require('../lib/data/Source');
+var Source = require('./data/Source');
 
 var processingHooks = [
   HOOKS.BEFORE_EXTRACT,

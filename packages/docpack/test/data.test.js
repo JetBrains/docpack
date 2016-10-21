@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 describe('Data sources', function () {
 
   describe('Source', function () {
-    var Source = require('../lib/data/Source');
+    var Source = require('./data/Source');
     var defaults = {
       path: 'file.js',
       absolutePath: '/src/file.js',
@@ -31,7 +31,7 @@ describe('Data sources', function () {
   });
 
   describe('CodeBlock', function () {
-    var CodeBlock = require('../lib/data/CodeBlock');
+    var CodeBlock = require('./data/CodeBlock');
 
     it('should throws when required attributes not provided', function() {
       expect(function() { new CodeBlock() }).to.throws();
@@ -50,7 +50,7 @@ describe('Data sources', function () {
   });
 
   describe('Example', function () {
-    var Example = require('../lib/data/Example');
+    var Example = require('./data/Example');
 
     it('should throws when required attributes not provided', function() {
       expect(function() { new Example() }).to.throws();
@@ -68,7 +68,7 @@ describe('Data sources', function () {
   });
 
   describe('ExampleFile', function () {
-    var ExampleFile = require('../lib/data/ExampleFile');
+    var ExampleFile = require('./data/ExampleFile');
 
     it('should throws when required attributes not provided', function() {
       expect(function() { new ExampleFile() }).to.throws();
@@ -89,7 +89,7 @@ describe('Data sources', function () {
   });
 
   describe('Asset', function () {
-    var Asset = require('../lib/data/Asset');
+    var Asset = require('./data/Asset');
 
     it('should throws when required attributes not provided', function() {
       expect(function() { new Asset() }).to.throws();
@@ -109,7 +109,7 @@ describe('Data sources', function () {
   });
 
   describe('Page', function () {
-    var Page = require('../lib/data/Page');
+    var Page = require('./data/Page');
 
     it('should throws when required attributes not provided', function() {
       expect(function() { new Page() }).to.throws();

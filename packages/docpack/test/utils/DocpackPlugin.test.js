@@ -1,4 +1,4 @@
-var DocpackPlugin = require('../../lib/utils/DocpackPlugin');
+var DocpackPlugin = require('.././utils/DocpackPlugin');
 var create = DocpackPlugin.create;
 
 var UNNAMED_PLUGIN_NAME = DocpackPlugin.UNNAMED_PLUGIN_NAME;
