@@ -2,6 +2,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "setup": "npm i && lerna bootstrap",
     "test": "mocha packages/*/test/{*.test.js,**/*.test.js}",
     "coverage": "istanbul cover --report html --report lcov _mocha packages/*/test/{*.test.js,**/*.test.js}"
   },
