@@ -5,7 +5,7 @@ node_js:
   - "6"
   - "4"
 
-script: npm run coverage
+script: npm i & npm run coverage
 
 env:
   global:
