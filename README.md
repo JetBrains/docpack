@@ -1,4 +1,4 @@
-# Docpack
+# Docpack [![Build Status](https://travis-ci.org/kisenka/docpack.svg?branch=master)](https://travis-ci.org/kisenka/docpack) [![Coverage Status](https://coveralls.io/repos/github/kisenka/docpack/badge.svg?branch=master)](https://coveralls.io/github/kisenka/docpack?branch=master)
 
 Webpack plugin to extract and generate documentation from your sources.
 
