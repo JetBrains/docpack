@@ -113,8 +113,13 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
         });
     });
 
-    compilation.plugin(Docpack.HOOKS.GENERATE, function (sources, done) {
+    compilation.plugin(Docpack.HOOKS.BEFORE_GENERATE, function (sources, done) {
       plugin.generate(compilation, sources);
+      done(null, sources);
+    });
+
+    compilation.plugin(Docpack.HOOKS.GENERATE, function (sources, done) {
+      plugin.generatePagesContent(compilation, sources);
       done(null, sources);
     });
   });
@@ -212,17 +217,29 @@ PageGeneratorPlugin.prototype.generate = function(compilation, sources) {
   var plugin = this;
   var targets = this.select(sources);
 
-  targets.forEach(function(target) {
-    var url = plugin.generateURL(target, compilation.compiler.context);
-    var content = plugin.render(compilation, target, targets);
-
-    target.page = new Page({url: url, content: content});
-
-    if (url in compilation.assets) {
-      var msg = url + ' page already exist in assets. Check `url` option (and maybe make it more specific)';
-      throw new Error(msg);
-    }
-
-    tools.emitAsset(compilation, url, content);
+  targets.forEach(function(source) {
+    var url = plugin.generateURL(source, compilation.compiler.context);
+    source.page = new Page({url: url});
   });
+};
+
+PageGeneratorPlugin.prototype.generatePagesContent = function(compilation, sources) {
+  var plugin = this;
+  var targets = this.select(sources).filter(function (source) {
+    return 'page' in source;
+  });
+
+  targets
+    .forEach(function(source) {
+      var page = source.page;
+
+      if (page.url in compilation.assets) {
+        var msg = page.url + ' page already exist in assets. Check `url` option (and maybe make it more specific)';
+        compilation.errors.push(new Error(msg));
+        return;
+      }
+
+      page.content = plugin.render(compilation, source, targets);
+      tools.emitAsset(compilation, page.url, page.content);
+    });
 };

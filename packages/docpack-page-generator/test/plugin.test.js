@@ -293,6 +293,7 @@ describe('Docpack Page Generator Plugin', () => {
     it('should create Page instance in Source and emit assets', () => {
       var compilation = tools.createCompilation();
       plugin.generate(compilation, sources);
+      plugin.generatePagesContent(compilation, sources);
 
       sources.forEach(source => {
         source.should.have.property('page').and.be.instanceOf(Page);
@@ -305,7 +306,13 @@ describe('Docpack Page Generator Plugin', () => {
       sources[1].attrs.url = '1.html';
 
       var compilation = tools.createCompilation();
-      (() => plugin.generate(compilation, sources)).should.throw();
+      plugin.generate(compilation, sources);
+      plugin.generatePagesContent(compilation, sources);
+
+      compilation.errors.should.be.lengthOf(1);
+      compilation.errors[0].should.be.instanceOf(Error)
+        .and.have.property('message').which.includes('already exist');
+
       Object.keys(compilation.assets).should.be.eql(['1.html']);
     });
   });
