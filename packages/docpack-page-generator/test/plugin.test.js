@@ -232,7 +232,7 @@ describe('Docpack Page Generator Plugin', () => {
         source: source,
         sources: sources,
         publicPath: undefined,
-        assetsByChunkName: {}
+        assetsByChunkName: undefined
       });
     });
 

@@ -119,6 +119,9 @@ PageGeneratorPlugin.prototype.apply = function(compiler) {
     });
 
     compilation.plugin(Docpack.HOOKS.GENERATE, function (sources, done) {
+      // TODO: refactor this ugly caching
+      plugin._assetsByChunkName = tools.getAssetsByChunkName(compilation);
+
       plugin.generatePagesContent(compilation, sources);
       done(null, sources);
     });
@@ -193,7 +196,7 @@ PageGeneratorPlugin.prototype.render = function(compilation, target, targets) {
     source: target,
     sources: targets,
     publicPath: compilation.outputOptions.publicPath,
-    assetsByChunkName: tools.getAssetsByChunkName(compilation)
+    assetsByChunkName: this._assetsByChunkName
   };
 
   var context;
