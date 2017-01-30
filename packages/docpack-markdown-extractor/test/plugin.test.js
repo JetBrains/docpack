@@ -87,8 +87,13 @@ describe('docpack-markdown-extractor', () => {
   });
 
   describe('apply()', () => {
-    it('should not emit assets if markdown file exist in `files`', () => {
-      return createCompiler(Plugin({files: '*.md'})).run().should.eventually.have.property('assets').that.is.empty;
+    it('should emit assets if markdown file exist in `files`', () => {
+      return createCompiler(Plugin({files: '*.md'})).run()
+        .then(compilation => {
+          var assets = compilation.assets;
+          assets.should.have.property('test1.md.js');
+          assets.should.have.property('test2.md.js');
+        });
     });
 
     it('should properly use `match` option', (done) => {

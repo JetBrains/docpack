@@ -50,7 +50,8 @@ MarkdownExtractor.prototype.configure = function(compiler) {
 
   files.forEach(function(filepath) {
     var request = tools.stringifyLoaderRequest(nullLoaderPath, null, filepath);
-    tools.addEntry(compiler, request, filepath);
+    var entryName = path.relative(compiler.context, filepath);
+    tools.addEntry(compiler, request, entryName);
   });
 };
 
