@@ -61,13 +61,6 @@ MarkdownExtractor.prototype.apply = function(compiler) {
   compiler.plugin(Docpack.HOOKS.INIT, this.configure.bind(this));
 
   compiler.plugin('compilation', function(compilation) {
-    compilation.plugin('chunk-asset', function (chunk, filename) {
-      var chunkName = chunk.name;
-      if (plugin.files.indexOf(chunkName) != -1) {
-        delete this.assets[filename];
-      }
-    });
-
     compilation.plugin(Docpack.HOOKS.EXTRACT, function(sources, done) {
       var targets = sources.filter(function(source) {
         return tools.matcher(config.match, source.absolutePath);
