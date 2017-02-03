@@ -47,14 +47,19 @@ describe('docpack-jsdoc-extractor', () => {
       const spiedExtractor = sinon.spy(extractor);
       PluginRewired.__set__('extractor', spiedExtractor);
 
-      Compiler({
+      const compiler = Compiler({
+        entry: '/entry',
         plugins: [
           Docpack()
             .use(Docpack.HOOKS.BEFORE_EXTRACT, (s, hookDone) => hookDone(null, sources))
             .use(PluginRewired({ match: /source1\.js/, parseMarkdown: false })),
         ],
-      })
-        .run()
+      });
+
+      const fs = tools.MemoryFileSystem(compiler._compiler.inputFileSystem);
+
+      fs.writeFile('/entry.js', '', 'utf-8')
+        .then(() => compiler.run())
         .then((compilation) => {
           spiedExtractor.should.be.calledOnce;
 
