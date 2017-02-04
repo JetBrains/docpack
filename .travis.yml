@@ -4,7 +4,7 @@ node_js:
   - stable
   - "6"
 
-script: npm run setup && npm run coverage
+script: npm prune && npm run setup && npm run coverage
 
 env:
   global:
