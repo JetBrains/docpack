@@ -9,14 +9,12 @@
   "main": "lib/docpack.js",
   "dependencies": {
     "bluebird": "^3.4.0",
-    "docpack": "^1.0.0",
-    "front-matter": "^2.1.0",
-    "glob": "^7.1.1",
     "is-plain-object": "^2.0.1",
     "merge-options": "0.0.64",
-    "null-loader": "^0.1.1",
-    "object-assign": "^4.1.0",
-    "remarkable": "^1.7.1",
     "webpack-toolkit": "^0.7.0"
+  },
+  "devDependencies": {
+    "null-loader": "^0.1.1",
+    "shuffle-array": "^1.0.0"
   }
 }

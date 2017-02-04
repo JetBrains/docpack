@@ -7,7 +7,6 @@
     "coverage": "istanbul cover --report html --report lcov _mocha packages/*/test/{*.test.js,**/*.test.js}"
   },
   "devDependencies": {
-    "bluebird": "^3.4.0",
     "chai": "3.5.0",
     "chai-as-promised": "5.3.0",
     "eslint": "^3.8.1",
@@ -17,13 +16,8 @@
     "lerna": "2.0.0-beta.36",
     "memory-fs": "^0.3.0",
     "mocha": "2.4.5",
-    "null-loader": "^0.1.1",
     "rewire": "^2.5.2",
-    "rimraf": "2.5.2",
-    "shuffle-array": "^1.0.0",
     "sinon": "1.17.4",
-    "sinon-chai": "2.8.0",
-    "webpack": "^2.2.1",
-    "webpack-toolkit": "^0.7.0"
+    "sinon-chai": "2.8.0"
   }
 }
