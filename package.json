@@ -23,7 +23,7 @@
     "shuffle-array": "^1.0.0",
     "sinon": "1.17.4",
     "sinon-chai": "2.8.0",
-    "webpack": "^1.12.10",
+    "webpack": "^2.2.1",
     "webpack-toolkit": "^0.7.0"
   }
 }
