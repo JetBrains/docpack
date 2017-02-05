@@ -83,7 +83,10 @@ describe('docpack-markdown-extractor', () => {
           md[0].resource.should.be.equal(resolve(fixturesPath, 'test1.md'));
           md[1].resource.should.be.equal(resolve(fixturesPath, 'test2.md'));
 
-          tools.stringifyLoaderConfig(md[0].loaders[0]).should.contain('null-loader');
+          var loader = md[0].loaders[0];
+          loader = typeof loader === 'string' ? {loader: loader} : loader;
+
+          tools.stringifyLoaderConfig(loader).should.contain('null-loader');
           done();
         })
         .catch(done);

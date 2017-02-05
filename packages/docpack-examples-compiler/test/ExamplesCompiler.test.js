@@ -206,12 +206,12 @@ describe('ExamplesCompiler', () => {
         context: fixturesPath,
         entry: './dummy',
         module: {
-          rules: [{
+          loaders: [{
             test: /\.css$/,
-            loader: TextExtractPlugin.extract({use: 'css-loader'})
+            loader: TextExtractPlugin.extract('css-loader')
           }]
         },
-        plugins: [new TextExtractPlugin({filename: '[name].css'})]
+        plugins: [new TextExtractPlugin('[name].css')]
       });
       var compiler = new ExamplesCompiler(compilation, {outputFilename: 'example'});
 
