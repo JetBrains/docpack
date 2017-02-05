@@ -43,6 +43,10 @@ Docpack.DocpackPlugin = DocpackPlugin;
 
 Docpack.createPlugin = DocpackPlugin.create;
 
+Docpack.getCompilerVersion = function(compiler) {
+  return compiler.options.hasOwnProperty('performance') ? 2 : 1;
+};
+
 Docpack.prototype.plugins = null;
 
 /**
