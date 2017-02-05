@@ -21,18 +21,28 @@ var processingHooks = [
   HOOKS.EMIT
 ];
 
+var context = '/';
+var entry = './entry';
+
 function createSpiedPluginBody() {
   return sinon.spy((sources, done) => done(null, sources));
+}
+
+function createFS() {
+  return new MemoryFS({
+    'entry.js': new Buffer('console.log(123)')
+  });
 }
 
 describe('Docpack', () => {
   it('statics', () => {
     Object.keys(Docpack).should.be.eql([
-      "API_VERSION",
-      "HOOKS",
-      "defaultConfig",
-      "DocpackPlugin",
-      "createPlugin"
+      'API_VERSION',
+      'HOOKS',
+      'defaultConfig',
+      'DocpackPlugin',
+      'createPlugin',
+      'getCompilerVersion'
     ]);
 
     Docpack.should.have.property('API_VERSION').and.be.a('string');
@@ -40,6 +50,7 @@ describe('Docpack', () => {
     Docpack.should.have.property('defaultConfig').and.be.an('object');
     Docpack.should.have.property('DocpackPlugin').and.be.equal(DocpackPlugin);
     Docpack.should.have.property('createPlugin').and.be.equal(createPlugin);
+    Docpack.should.have.property('getCompilerVersion').and.be.a('function');
   });
 
   describe('constructor()', () => {
@@ -58,9 +69,9 @@ describe('Docpack', () => {
       Docpack(cfg).should.have.property('config').and.be.eql(cfg);
     });
   });
-  
+
   describe('use()', () => {
-    it('should throws when wrong plugin type', () => {
+    it('should throws when wrong plugin signature', () => {
       var docpack = Docpack();
       (function() { docpack.use( function(){} ) }).should.throws(TypeError);
       (function() { docpack.use( (function(){})() ) }).should.throws(TypeError);
@@ -113,7 +124,12 @@ describe('Docpack', () => {
       var pluginBody = sinon.spy();
       var plugin = createPlugin(pluginBody)();
 
-      InMemoryCompiler({plugins: [Docpack().use(plugin)]})
+      InMemoryCompiler({
+        context: context,
+        entry: entry,
+        plugins: [Docpack().use(plugin)]
+      })
+        .setInputFS(createFS())
         .run()
         .then(compilation => {
           pluginBody.should.have.been.calledOne;
@@ -125,8 +141,8 @@ describe('Docpack', () => {
     it('should always process original sources', (done) => {
       var docpack = Docpack();
       var compiler = InMemoryCompiler({
-        context: '/',
-        entry: './entry',
+        context: context,
+        entry: entry,
         module: {
           loaders: [
             {
@@ -136,7 +152,8 @@ describe('Docpack', () => {
           ]
         },
         plugins: [docpack]
-      });
+      })
+      .setInputFS(createFS());
 
       compiler.setInputFS(new MemoryFS({
         'entry.js': new Buffer('console.log(123)')
@@ -156,15 +173,12 @@ describe('Docpack', () => {
       var compiler;
 
       beforeEach(() => {
-        fs = new MemoryFS({
-          'entry.js': new Buffer('')
-        });
-
         compiler = InMemoryCompiler({
-          context: '/',
-          entry: './entry',
+          context: context,
+          entry: entry,
           plugins: []
-        }, {inputFS: fs});
+        })
+        .setInputFS(createFS());
       });
 
       it('should throw if invalid type returned from plugin', () => {
@@ -239,7 +253,12 @@ describe('Docpack', () => {
 
         sinon.spy(docpack, 'apply');
 
-        InMemoryCompiler({plugins: [docpack]})
+        InMemoryCompiler({
+          context: context,
+          entry: entry,
+          plugins: [docpack]
+        })
+          .setInputFS(createFS())
           .run()
           .then(compilation => {
             var childCompiler = tools.ChildCompiler(compilation);

@@ -7,6 +7,10 @@ var Docpack = require('docpack');
 var Source = require('docpack/lib/data/Source');
 var Page = require('docpack/lib/data/Page');
 
+function getLoadersPropName(compiler) {
+  return Docpack.getCompilerVersion(compiler) === 2 ? 'rules' : 'loaders';
+}
+
 describe('Docpack Page Generator Plugin', () => {
   describe('statics', () => {
     it('should export statics', () => {
@@ -33,30 +37,24 @@ describe('Docpack Page Generator Plugin', () => {
       var compiler = new tools.createCompiler({
         resolve: {extensions: ['.foo']}
       });
+      var prop = getLoadersPropName(compiler);
 
       plugin.configure(compiler);
-      compiler.options.module.loaders.should.be.empty;
+      compiler.options.module[prop].should.be.empty;
 
       // matched loaders
       plugin = Plugin({template: 'template.zzz'});
       compiler = new tools.createCompiler({
-        module: {loaders: [
-          {test: /\.zzz$/, loader: 'zzz-loader'}
-        ]}
+        module: {
+          [prop]: [
+            {test: /\.zzz$/, loader: 'zzz-loader'}
+          ]
+        }
       });
       plugin.configure(compiler);
-      compiler.options.module.loaders.should.be.eql([
+      compiler.options.module[prop].should.be.eql([
         {test: /\.zzz$/, loader: 'zzz-loader'}
       ]);
-    });
-
-    it('should create `loaders` field of webpack config section if it\'s empty', () => {
-      var plugin = Plugin({template: 'qwe'});
-      var compiler = new tools.createCompiler();
-
-      compiler.options.module.should.not.have.property('loaders');
-      plugin.configure(compiler);
-      compiler.options.module.loaders.should.be.an('array').and.be.empty;
     });
 
     it('should use `loader` option if presented', () => {
@@ -68,20 +66,23 @@ describe('Docpack Page Generator Plugin', () => {
         }
       });
       var compiler = new tools.createCompiler();
+      var prop = getLoadersPropName(compiler);
 
       plugin.configure(compiler);
-      compiler.options.module.loaders[0].should.be.eql({
+      compiler.options.module[prop][0].should.be.eql({
         test: /zzz$/,
         loader: 'zzz-loader'
       });
     });
 
-    it('should use fallback loader if no processing template loaders found', () => {
+    it('should use fallback loader if no template loaders found', () => {
       var plugin = Plugin({template: './template.zzz'});
       var compiler = new tools.createCompiler();
+      var prop = getLoadersPropName(compiler);
+
       plugin.configure(compiler);
 
-      compiler.options.module.loaders[0].should.be.eql({
+      compiler.options.module[prop][0].should.be.eql({
         test: /\.zzz$/,
         loader: require.resolve(Plugin.CONST.FALLBACK_LOADER_NAME),
         include: path.dirname(path.resolve('./template.zzz'))

@@ -12,6 +12,7 @@ function createCompiler(plugin) {
 
   var compiler = tools.InMemoryCompiler({
     context: fixturesPath,
+    entry: './dummy',
     plugins: plugins
   });
 
@@ -76,10 +77,13 @@ describe('docpack-markdown-extractor', () => {
     it('should add each markdown file as entry point to compiler', (done) => {
       createCompiler(Plugin({files: '*.md'})).run()
         .then(compilation => {
-          compilation.entries.should.be.lengthOf(2);
-          compilation.entries[0].resource.should.be.equal(resolve(fixturesPath, 'test1.md'));
-          compilation.entries[1].resource.should.be.equal(resolve(fixturesPath, 'test2.md'));
-          compilation.entries[0].loaders[0].should.contain('null-loader');
+          var md = compilation.entries.filter(m => m.resource.endsWith('.md'));
+
+          md.should.be.lengthOf(2);
+          md[0].resource.should.be.equal(resolve(fixturesPath, 'test1.md'));
+          md[1].resource.should.be.equal(resolve(fixturesPath, 'test2.md'));
+
+          tools.stringifyLoaderConfig(md[0].loaders[0]).should.contain('null-loader');
           done();
         })
         .catch(done);

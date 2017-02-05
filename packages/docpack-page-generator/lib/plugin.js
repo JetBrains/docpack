@@ -66,17 +66,19 @@ PageGeneratorPlugin.prototype.configure = function(compiler) {
   var moduleOptions = compiler.options.module;
   var hasLoadersToProcessTemplate = resolveExtensions.indexOf(tplExt) >= 0 || tools.getMatchedLoaders(moduleOptions, tplAbsPath).length > 0;
 
-  if (!Array.isArray(moduleOptions.loaders)) {
-    moduleOptions.loaders = [];
+  var loadersProp = Docpack.getCompilerVersion(compiler) === 2 ? 'rules' : 'loaders';
+
+  if (!Array.isArray(moduleOptions[loadersProp])) {
+    moduleOptions[loadersProp] = [];
   }
 
   // If loader specified explicitly, add it to config
   if (config.loader) {
-    moduleOptions.loaders.push(config.loader);
+    moduleOptions[loadersProp].push(config.loader);
   }
   else if (!hasLoadersToProcessTemplate) {
     // If no loaders to process the template - add fallback loader to config
-    moduleOptions.loaders.push({
+    moduleOptions[loadersProp].push({
       test: new RegExp('\\.' + tplExt.substr(1) + '$'),
       loader: require.resolve(CONST.FALLBACK_LOADER_NAME),
       include: path.dirname(tplAbsPath)

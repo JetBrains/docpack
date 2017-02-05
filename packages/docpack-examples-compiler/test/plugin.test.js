@@ -25,6 +25,7 @@ var mockSourceWithFiles = function(absPath, files) {
 var createCompilerWithExampleFiles = function(files, pluginOptions) {
   var compiler = tools.InMemoryCompiler({
     context: fixturesPath,
+    entry: './dummy',
     plugins: [
       Docpack()
         .use(Docpack.HOOKS.EXTRACT, function (sources, done) {
@@ -79,7 +80,7 @@ describe('docpack-example-compiler', () => {
         var asset = file.assets[0];
 
         file.assets.should.be.lengthOf(1);
-        Object.keys(compilation.assets).should.be.lengthOf(1);
+        Object.keys(compilation.assets).should.be.lengthOf(2);
 
         asset
           .should.have.property('content').that.equal(compilation.assets[asset.path].source())
