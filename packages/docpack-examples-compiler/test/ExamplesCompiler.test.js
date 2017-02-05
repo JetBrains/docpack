@@ -69,7 +69,7 @@ describe('ExamplesCompiler', () => {
       return ExamplesCompiler.getLoadersToProcessExampleFile(
         f,
         filename || ExamplesCompiler.defaultConfig.filename,
-        loadersConfig || {}
+        loadersConfig || {loaders: []}
       )
     };
 
@@ -107,16 +107,17 @@ describe('ExamplesCompiler', () => {
         {
           loaders: [{
             test: /\.scss$/,
-            loader: TextExtractPlugin.extract('css!scss')
+            loader: TextExtractPlugin.extract('css-loader!scss-loader')
           }
           ]
         }
       );
 
-      textExtractPluginCase.should.be.lengthOf(1);
-      textExtractPluginCase[0].loader
+      var stringified = tools.stringifyLoaderConfig(textExtractPluginCase[0]);
+
+      stringified
         .should.contain('node_modules/extract-text-webpack-plugin')
-        .and.contain('css!scss');
+        .and.contain('css-loader!scss-loader');
     });
   });
 
@@ -205,12 +206,12 @@ describe('ExamplesCompiler', () => {
         context: fixturesPath,
         entry: './dummy',
         module: {
-          loaders: [{
+          rules: [{
             test: /\.css$/,
-            loader: TextExtractPlugin.extract('css')
+            loader: TextExtractPlugin.extract({use: 'css-loader'})
           }]
         },
-        plugins: [new TextExtractPlugin('[name].css')]
+        plugins: [new TextExtractPlugin({filename: '[name].css'})]
       });
       var compiler = new ExamplesCompiler(compilation, {outputFilename: 'example'});
 
