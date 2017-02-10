@@ -65,11 +65,15 @@ describe('ExamplesCompiler', () => {
 
   describe('#getLoadersToProcessExampleFile()', () => {
     var test = function (file, loadersConfig, filename) {
-      var f = new ExampleFile({type: file.type, content: file.content || '', attrs: file.attrs});
+      var loadersCfg = loadersConfig || {loaders: []};
+      loadersCfg.rules = loadersCfg.loaders;
+
+      var file = new ExampleFile({type: file.type, content: file.content || '', attrs: file.attrs});
+
       return ExamplesCompiler.getLoadersToProcessExampleFile(
-        f,
+        file,
         filename || ExamplesCompiler.defaultConfig.filename,
-        loadersConfig || {loaders: []}
+        loadersCfg
       )
     };
 
@@ -163,8 +167,7 @@ describe('ExamplesCompiler', () => {
         .and.calledWith(file, entryPath)
         .and.returned('example');
 
-      addEntry.should.have.been.calledOnce
-        .and.calledWith(fullRequest, 'example', compiler._compiler.context);
+      addEntry.should.have.been.calledOnce;
     });
   });
 
