@@ -49,7 +49,6 @@ describe('Docpack', () => {
     Docpack.should.have.property('defaultConfig').and.be.an('object');
     Docpack.should.have.property('DocpackPlugin').and.be.equal(DocpackPlugin);
     Docpack.should.have.property('createPlugin').and.be.equal(createPlugin);
-    Docpack.should.have.property('getCompilerVersion').and.be.a('function');
   });
 
   describe('constructor()', () => {
