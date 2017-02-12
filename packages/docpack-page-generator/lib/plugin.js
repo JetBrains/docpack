@@ -66,7 +66,7 @@ PageGeneratorPlugin.prototype.configure = function(compiler) {
   var moduleOptions = compiler.options.module;
   var hasLoadersToProcessTemplate = resolveExtensions.indexOf(tplExt) >= 0 || tools.getMatchedLoaders(moduleOptions, tplAbsPath).length > 0;
 
-  var loadersProp = Docpack.getCompilerVersion(compiler) === 2 ? 'rules' : 'loaders';
+  var loadersProp = tools.getWebpackVersion(true) === '2' ? 'rules' : 'loaders';
 
   if (!Array.isArray(moduleOptions[loadersProp])) {
     moduleOptions[loadersProp] = [];

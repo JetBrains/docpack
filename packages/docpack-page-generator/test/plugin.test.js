@@ -7,9 +7,7 @@ var Docpack = require('docpack');
 var Source = require('docpack/lib/data/Source');
 var Page = require('docpack/lib/data/Page');
 
-function getLoadersPropName(compiler) {
-  return Docpack.getCompilerVersion(compiler) === 2 ? 'rules' : 'loaders';
-}
+var loadersPropName = tools.getWebpackVersion(true) === '2' ? 'rules' : 'loaders';
 
 describe('Docpack Page Generator Plugin', () => {
   describe('statics', () => {
@@ -37,7 +35,7 @@ describe('Docpack Page Generator Plugin', () => {
       var compiler = new tools.createCompiler({
         resolve: {extensions: ['.foo']}
       });
-      var prop = getLoadersPropName(compiler);
+      var prop = loadersPropName;
 
       plugin.configure(compiler);
       compiler.options.module[prop].should.be.empty;
@@ -66,7 +64,7 @@ describe('Docpack Page Generator Plugin', () => {
         }
       });
       var compiler = new tools.createCompiler();
-      var prop = getLoadersPropName(compiler);
+      var prop = loadersPropName;
 
       plugin.configure(compiler);
       compiler.options.module[prop][0].should.be.eql({
@@ -78,7 +76,7 @@ describe('Docpack Page Generator Plugin', () => {
     it('should use fallback loader if no template loaders found', () => {
       var plugin = Plugin({template: './template.zzz'});
       var compiler = new tools.createCompiler();
-      var prop = getLoadersPropName(compiler);
+      var prop = loadersPropName;
 
       plugin.configure(compiler);
 

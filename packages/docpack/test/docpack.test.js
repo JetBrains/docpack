@@ -41,8 +41,7 @@ describe('Docpack', () => {
       'HOOKS',
       'defaultConfig',
       'DocpackPlugin',
-      'createPlugin',
-      'getCompilerVersion'
+      'createPlugin'
     ]);
 
     Docpack.should.have.property('API_VERSION').and.be.a('string');
