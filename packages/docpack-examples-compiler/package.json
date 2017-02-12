@@ -8,6 +8,7 @@
   "repository": "https://github.com/kisenka/docpack/tree/master/packages/docpack-examples-compiler",
   "main": "lib/plugin.js",
   "dependencies": {
+    "bluebird": "^3.4.0",
     "docpack": "^1.0.0",
     "dotty": "0.0.2",
     "loader-utils": "^0.2.0",
