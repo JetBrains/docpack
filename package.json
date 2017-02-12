@@ -2,7 +2,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "setup": "npm i && lerna bootstrap",
+    "bootstrap": "node ./tasks/bootstrap && npm run env:webpack2 && npm i && lerna bootstrap",
+    "env:webpack1": "node ./tasks/select-env webpack1",
+    "env:webpack2": "node ./tasks/select-env webpack2",
     "test": "mocha packages/*/test/{*.test.js,**/*.test.js}",
     "coverage": "istanbul cover --report html --report lcov _mocha packages/*/test/{*.test.js,**/*.test.js}"
   },
@@ -15,8 +17,10 @@
     "istanbul": "^0.4.5",
     "lerna": "2.0.0-beta.37",
     "memory-fs": "^0.3.0",
+    "minimist": "^1.2.0",
     "mocha": "2.4.5",
     "rewire": "^2.5.2",
+    "shelljs": "^0.7.6",
     "sinon": "1.17.4",
     "sinon-chai": "2.8.0"
   }
