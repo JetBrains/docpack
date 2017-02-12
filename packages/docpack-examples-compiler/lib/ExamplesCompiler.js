@@ -8,6 +8,8 @@ var format = require('util').format;
 var Docpack = require('docpack');
 var DocpackPlugin = require('docpack/lib/utils/DocpackPlugin');
 
+var WEBPACK_VERSION = tools.getWebpackVersion(true);
+
 /**
  * @typedef {ChildCompilerConfig} ExamplesCompilerConfig
  */
@@ -147,12 +149,13 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
   var matchedLoaders = this.getLoadersToProcessExampleFile(file);
 
   // Shared loader config
-  var sharedDataLoaderConfig = {
-    loader: SHARED_DATA_LOADER_PATH,
-    query: {
-      path: fileIndex.toString() + '.content',
-      hash: getHash(file.content)
-    }
+  var sharedDataLoaderConfig = {};
+
+  sharedDataLoaderConfig['loader'] = SHARED_DATA_LOADER_PATH;
+
+  sharedDataLoaderConfig[WEBPACK_VERSION === '1' ? 'query' : 'options'] = {
+    path: fileIndex.toString() + '.content',
+    hash: getHash(file.content)
   };
 
   var loadersRequest = matchedLoaders
