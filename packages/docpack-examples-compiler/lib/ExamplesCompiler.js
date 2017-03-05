@@ -7,6 +7,7 @@ var format = require('util').format;
 
 var Docpack = require('docpack');
 var DocpackPlugin = require('docpack/lib/utils/DocpackPlugin');
+var JsonpTemplatePlugin = require("webpack/lib/JsonpTemplatePlugin");
 
 var WEBPACK_VERSION = tools.getWebpackVersion(true);
 
@@ -67,6 +68,11 @@ function ExamplesCompiler(compilation, config) {
    */
   compiler.options.output.filename = '[name].js';
 
+
+  this._compiler.apply(
+    new JsonpTemplatePlugin()
+  );
+
   /**
    * We will extract example files content for compilation via special loader,
    * so we share array with example files between compiler and loader
@@ -107,6 +113,11 @@ ExamplesCompiler.prototype.config = null;
  * @type {Array<ExampleFile>}
  */
 ExamplesCompiler.prototype.files = null;
+
+ExamplesCompiler.prototype.hasHotModuleReplacement = function () {
+  var parentCompilerOptions = this._compiler.parentCompilation.compiler.options;
+  return parentCompilerOptions.devServer && parentCompilerOptions.devServer.hot === true;
+};
 
 ExamplesCompiler.prototype.applyParentCompilerPlugins = function() {
   var compiler = this._compiler;
@@ -167,6 +178,23 @@ ExamplesCompiler.prototype.addFile = function(file, resourcePath) {
 
   // Get file output name
   var entryName = this.getOutputFilename(file, resourcePath);
+
+  if (this.hasHotModuleReplacement()) {
+    var serverOpts = this._compiler.parentCompilation.compiler.options.devServer;
+    var domain = `${serverOpts.https ? 'https' : 'http'}://${serverOpts.host}:${serverOpts.port}`;
+    var clientEntryPath = require.resolve("webpack-dev-server/client/");
+
+    var entries = [`${clientEntryPath}?${domain}`];
+
+    if (serverOpts.hotOnly) {
+      entries.push('webpack/hot/only-dev-server');
+    } else if (serverOpts.hot) {
+      entries.push('webpack/hot/dev-server');
+    }
+
+    entries.push(fullRequest);
+    fullRequest = entries;
+  }
 
   // Add entry to compiler
   this.addEntry(fullRequest, entryName, compilationContext);
