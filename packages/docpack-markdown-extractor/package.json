@@ -15,6 +15,6 @@
     "null-loader": "^0.1.1",
     "object-assign": "^4.1.0",
     "remarkable": "^1.7.1",
-    "webpack-toolkit": "^0.7.0"
+    "webpack-toolkit": "^1.0.0"
   }
 }

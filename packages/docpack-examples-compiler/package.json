@@ -13,7 +13,7 @@
     "dotty": "0.0.2",
     "loader-utils": "^0.2.0",
     "merge-options": "0.0.64",
-    "webpack-toolkit": "^0.7.0"
+    "webpack-toolkit": "^1.0.0"
   },
   "devDependencies": {
     "css-loader": "^0.25.0",
