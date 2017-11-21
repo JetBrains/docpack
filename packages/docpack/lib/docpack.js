@@ -62,7 +62,7 @@ Docpack.prototype.use = function(arg, handler) {
       }
     })();
 
-  } else if (arg instanceof DocpackPlugin) {
+  } else if (typeof arg === 'object' || typeof arg === 'function') {
     instance = arg;
 
   } else {
