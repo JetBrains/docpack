@@ -1,6 +1,9 @@
 {
   "private": true,
   "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "bootstrap": "node ./tasks/bootstrap && npm run env:webpack2 && npm i && lerna bootstrap",
     "env:webpack1": "node ./tasks/select-env webpack1",
@@ -14,6 +17,7 @@
     "eslint": "^3.8.1",
     "eslint-config-airbnb-base": "^9.0.0",
     "eslint-plugin-import": "^2.0.1",
+    "extract-text-webpack-plugin": "3",
     "istanbul": "^0.4.5",
     "lerna": "2.0.0-beta.37",
     "memory-fs": "^0.3.0",
@@ -22,6 +26,7 @@
     "rewire": "^2.5.2",
     "shelljs": "^0.7.6",
     "sinon": "1.17.4",
-    "sinon-chai": "2.8.0"
+    "sinon-chai": "2.8.0",
+    "webpack": "2"
   }
 }
