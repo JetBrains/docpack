@@ -10,7 +10,7 @@
   "dependencies": {
     "bluebird": "^3.4.0",
     "is-plain-object": "^2.0.1",
-    "merge-options": "0.0.64",
+    "merge-options": "^1.0.1",
     "webpack-toolkit": "^1.0.0"
   },
   "devDependencies": {

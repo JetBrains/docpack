@@ -10,7 +10,7 @@
   "dependencies": {
     "docpack": "^1.0.0",
     "is-plain-object": "^2.0.1",
-    "merge-options": "0.0.64",
+    "merge-options": "^1.0.1",
     "twig-loader": "^0.2.3",
     "url-slug": "^2.0.0",
     "webpack-toolkit": "^1.0.0"
