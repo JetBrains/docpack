@@ -1,6 +1,6 @@
 {
   "name": "docpack",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Webpack plugin to extract and generate documentation from your sources",
   "author": "kisenka <qtuzov@gmail.com> (https://github.com/kisenka)",
   "homepage": "https://github.com/kisenka/docpack",
