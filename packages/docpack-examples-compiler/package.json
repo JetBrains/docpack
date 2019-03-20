@@ -12,7 +12,7 @@
     "docpack": "^1.0.0",
     "dotty": "0.0.2",
     "loader-utils": "^0.2.0",
-    "merge-options": "0.0.64",
+    "merge-options": "^1.0.1",
     "webpack-toolkit": "^1.0.0"
   },
   "devDependencies": {
