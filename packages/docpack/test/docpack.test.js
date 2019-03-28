@@ -69,16 +69,6 @@ describe('Docpack', () => {
   });
 
   describe('use()', () => {
-    it('should throws when wrong plugin signature', () => {
-      var docpack = Docpack();
-      (function() { docpack.use( function(){} ) }).should.throws(TypeError);
-      (function() { docpack.use( (function(){})() ) }).should.throws(TypeError);
-      (function() { docpack.use( function(){ return function() {} }() ) }).should.throws(TypeError);
-      (function() { docpack.use( createPlugin() ) }).should.throws();
-
-      (function() { docpack.use( createPlugin()() ) }).should.not.throws();
-    });
-
     it('should allow to inject in any hook (actually simple plugin creation) (hook:String, handler:Function)', () => {
       var docpack = Docpack();
       (function() { docpack.use(1, function(){}) }).should.throws(TypeError);
@@ -151,7 +141,7 @@ describe('Docpack', () => {
         },
         plugins: [docpack]
       })
-      .setInputFS(createFS());
+        .setInputFS(createFS());
 
       compiler.setInputFS(new MemoryFS({
         'entry.js': new Buffer('console.log(123)')
@@ -176,7 +166,7 @@ describe('Docpack', () => {
           entry: entry,
           plugins: []
         })
-        .setInputFS(createFS());
+          .setInputFS(createFS());
       });
 
       it('should throw if invalid type returned from plugin', () => {
@@ -241,7 +231,7 @@ describe('Docpack', () => {
           });
           done();
         })
-        .catch(done);
+          .catch(done);
       });
 
       it('should skip child compilations', (done) => {

@@ -62,7 +62,7 @@ Docpack.prototype.use = function(arg, handler) {
       }
     })();
 
-  } else if (typeof arg === 'object' || typeof arg === 'function') {
+  } else if (typeof arg === 'object' || (typeof arg === 'function' && !handler)) {
     instance = arg;
 
   } else {
@@ -122,7 +122,7 @@ Docpack.prototype.apply = function(compiler) {
               content: content.toString()
             });
           })
-        })
+      })
 
         .then(function(sources) {
           return applyHook(applyPluginsWaterfall, HOOKS.BEFORE_EXTRACT, sources);
